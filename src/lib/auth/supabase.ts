@@ -12,9 +12,15 @@ let client: SupabaseClient | null | undefined;
 
 export function supabase(): SupabaseClient | null {
   if (client !== undefined) return client;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  client = url && key ? createClient(url, key) : null;
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+  const key = (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
+  // A misconfigured value (placeholder text, missing protocol) must degrade
+  // to demo mode, never crash prerendering or the browser.
+  try {
+    client = /^https?:\/\/.+/.test(url) && key ? createClient(url, key) : null;
+  } catch {
+    client = null;
+  }
   return client;
 }
 
