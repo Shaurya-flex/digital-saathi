@@ -8,8 +8,7 @@ import { AppBoot } from '@/components/layout/AppBoot';
 export const metadata: Metadata = {
   title: 'Digital Saathi — Aap bas boliye, kaam hum sambhalenge',
   description:
-    'Digital Saathi is an AI concierge for India. Speak or type what you need — recharge, bills, bookings, forms, documents, appointments and local services.',
-  robots: { index: false },
+    'Digital Saathi is an AI concierge for India, live in Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Kolkata, Pune and Ahmedabad. Speak or type what you need — recharge, bills, bookings, forms, documents, appointments and doorstep services.',
 };
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 };

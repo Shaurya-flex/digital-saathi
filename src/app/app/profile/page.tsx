@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useDB } from '@/hooks/useDB';
 import { logout } from '@/lib/auth/session';
 import { LANGS } from '@/lib/config';
+import { METRO_CITIES } from '@/lib/owner';
 import { me, mutate, resetAll, toast } from '@/lib/store';
 import type { Lang } from '@/lib/types';
 
@@ -36,7 +37,12 @@ export default function ProfilePage() {
               <label className="f">Name</label>
               <input type="text" defaultValue={u.name} onBlur={(e) => mutate(() => { u.name = e.target.value || u.name; })} />
               <label className="f">Phone</label><input type="text" defaultValue={u.phone || ''} disabled />
-              <label className="f">City</label><input type="text" defaultValue={u.city} disabled />
+              <label className="f">City</label>
+              <select value={u.city || ''} onChange={(e) => { mutate(() => { u.city = e.target.value; }); toast('City set. Doorstep services will match here.'); }}>
+                <option value="" disabled>Choose your city</option>
+                {METRO_CITIES.map((c2) => <option key={c2} value={c2}>{c2}</option>)}
+                <option value="Other">Other (services coming soon)</option>
+              </select>
             </div>
             <div>
               <label className="f">Language</label>

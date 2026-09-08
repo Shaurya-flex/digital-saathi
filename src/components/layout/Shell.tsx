@@ -7,18 +7,31 @@ import { useSession } from '@/hooks/useSession';
 
 export type NavItem = [key: string, label: string, icon: string];
 
+/* Which roles may open each portal. Operations pages (admin) and the supply
+   portals are invisible to customers and the signed-out public — the shell
+   silently redirects them home. */
+const PORTAL_ROLES: Record<string, string[]> = {
+  app: ['customer', 'admin'],
+  provider: ['provider', 'admin'],
+  agent: ['agent', 'admin'],
+  admin: ['admin'],
+};
+
 /* Shared app shell: sticky sidebar nav + content. Redirects to /login when
-   no demo session exists (client-side guard, like the prototype). */
+   there is no session, and away when the role has no access to this portal. */
 export function Shell({ nav, base, active, children }: {
   nav: NavItem[]; base: string; active: string; children: ReactNode;
 }) {
   const { user, ready } = useSession();
   const router = useRouter();
+  const allowed = !user ? false : (PORTAL_ROLES[base] || ['admin']).includes(user.role);
   useEffect(() => {
-    if (ready && !user) router.replace('/login');
-  }, [ready, user, router]);
+    if (!ready) return;
+    if (!user) router.replace('/login');
+    else if (!allowed) router.replace(user.role === 'customer' ? '/app/ask' : '/');
+  }, [ready, user, allowed, router]);
   if (!ready) return <main id="main" className="wrap appshell"><section /></main>;
-  if (!user) return null;
+  if (!user || !allowed) return null;
   return (
     <main id="main" className="wrap appshell">
       <aside className="side">

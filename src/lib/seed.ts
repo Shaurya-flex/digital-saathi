@@ -336,17 +336,17 @@ export function SEED(): DBShape {
   return db;
 }
 
-/* Real-user seed: the verified supply network (providers + agents) stays —
-   it is the marketplace catalogue — but there are NO fabricated customer
-   accounts, tasks, documents or notifications. Every signed-in user starts
-   with a clean, private slate. */
+/* Real-user seed: completely clean. No fabricated customers, providers,
+   agents, tasks, documents or reviews — real partners and agents enter
+   through the application funnels and admin verification. Signed-in users
+   start with a private, empty slate. */
 export function REAL_SEED(): DBShape {
   return {
     config: JSON.parse(JSON.stringify(DEFAULT_CONFIG)),
     users: [],
     family: [],
-    providers: JSON.parse(JSON.stringify(PROVIDERS)),
-    agents: JSON.parse(JSON.stringify(AGENTS)),
+    providers: [],
+    agents: [],
     tasks: [], bookings: [], documents: [],
     notifications: [], reviews: [], disputes: [], ledger: [], events: [],
     threads: {}, reminders: [], ui: {}, session: null, seededAt: now(), mode: 'real',

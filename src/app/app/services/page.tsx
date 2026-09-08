@@ -63,6 +63,16 @@ export default function ServicesPage() {
           ))}
         </div>
         <h3 className="mt2">Local services</h3>
+        {!db.providers.length ? (
+          <div className="card mb">
+            <strong>Doorstep partners are onboarding in your city</strong>
+            <p className="small muted" style={{ margin: '.3rem 0 .6rem' }}>
+              We verify every professional&rsquo;s identity (and police clearance for home visits) before their first
+              job, so the network grows city by city. You&rsquo;ll see partners here the moment they clear verification.
+            </p>
+            <Link className="btn ghost sm" href="/partner">Know a professional? Send them to apply</Link>
+          </div>
+        ) : null}
         <div className="row mb">
           <button className="btn sm" onClick={request} disabled={busy}>
             {busy ? 'Locating…' : geo ? '📍 Update my location' : '📍 Use my location'}
@@ -85,7 +95,7 @@ export default function ServicesPage() {
               ))}
             </div>
           </>
-        ) : (
+        ) : db.providers.length ? (
           <div className="mapbox mb">
             <span className="pin me" style={{ left: '40%', top: '52%' }}>You</span>
             {db.providers.map((p) => (
@@ -97,13 +107,17 @@ export default function ServicesPage() {
               </button>
             ))}
           </div>
-        )}
-        <h3 className="sechead">All partners</h3>
-        <div className="grid g3">
-          {db.providers.map((p) => (
-            <ProviderCard key={p.id} p={p} onBook={(pp) => ask('Need a ' + pp.cat.toLowerCase() + ' at home')} />
-          ))}
-        </div>
+        ) : null}
+        {db.providers.length ? (
+          <>
+            <h3 className="sechead">All partners</h3>
+            <div className="grid g3">
+              {db.providers.map((p) => (
+                <ProviderCard key={p.id} p={p} onBook={(pp) => ask('Need a ' + pp.cat.toLowerCase() + ' at home')} />
+              ))}
+            </div>
+          </>
+        ) : null}
         {pin ? (
           <Modal onClose={() => setPin(null)}>
             <h3>{pin.name}</h3>

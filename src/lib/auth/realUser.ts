@@ -6,6 +6,7 @@
    Google profile. The store stays the single source of truth the UI reads;
    src/lib/sync/backup.ts mirrors it to Supabase. */
 
+import { isOwnerEmail } from '../owner';
 import { REAL_SEED } from '../seed';
 import { getDB, addCredits, commit, replaceDB, track } from '../store';
 import type { User } from '../types';
@@ -28,7 +29,8 @@ export function ensureRealUser(su: SupaUser): User {
     u = {
       id,
       name: meta.full_name || meta.name || su.email?.split('@')[0] || 'Saathi user',
-      role: 'customer',
+      role: isOwnerEmail(su.email) ? 'admin' : 'customer',
+      email: su.email || undefined,
       phone: su.phone || undefined,
       city: '',
       lang: 'hinglish',
@@ -42,6 +44,9 @@ export function ensureRealUser(su: SupaUser): User {
     db.users.push(u);
     addCredits(id, 50, 'Welcome — Free plan credits');
     track('signup_google');
+  } else if (isOwnerEmail(su.email) && u.role !== 'admin') {
+    // Owner list changed after this account was created — promote.
+    u.role = 'admin';
   }
   db.session = id;
   commit();

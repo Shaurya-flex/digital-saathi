@@ -10,6 +10,7 @@ import { Footer } from '@/components/layout/Footer';
 import { useDB } from '@/hooks/useDB';
 import { authConfigured, currentSupaUser, signInWithGoogle } from '@/lib/auth/supabase';
 import { homeFor, login } from '@/lib/auth/session';
+import { demoAllowed } from '@/lib/owner';
 import { cfg, resetAll, toast } from '@/lib/store';
 import type { User } from '@/lib/types';
 
@@ -20,7 +21,7 @@ export default function Login() {
   const [waiting, setWaiting] = useState(false);
 
   useEffect(() => {
-    setDemo(new URLSearchParams(window.location.search).get('demo') === '1');
+    setDemo(demoAllowed() && new URLSearchParams(window.location.search).get('demo') === '1');
   }, []);
 
   // Coming back from Google OAuth (or already signed in): go straight in.
@@ -95,10 +96,12 @@ export default function Login() {
                 <li>Verified local professionals near your location</li>
               </ul>
             </div>
-            <p className="small muted mt">
-              Just exploring? <a className="linkish" href="/login?demo=1">Open the demo sandbox</a> — fabricated
-              accounts, nothing you do there is real.
-            </p>
+            {demoAllowed() ? (
+              <p className="small muted mt">
+                Just exploring? <a className="linkish" href="/login?demo=1">Open the demo sandbox</a> — fabricated
+                accounts, nothing you do there is real.
+              </p>
+            ) : null}
           </>
         ) : (
           <>

@@ -27,6 +27,7 @@ export interface User {
   id: string;
   name: string;
   role: Role;
+  email?: string;
   phone?: string;
   city: string;
   lang: Lang;

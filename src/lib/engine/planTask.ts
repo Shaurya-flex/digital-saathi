@@ -140,6 +140,13 @@ export function buildOptions(t: Task) {
       : 'Electrician';
     d.need = need;
     d.matches = matchProviders(need);
+    if (!d.matches.length) {
+      return finishNow(t, say(
+        `Verified ${need.toLowerCase()}s are onboarding in your city right now. You will get an alert the moment one is available — no charge for this request.`,
+        `आपके शहर में जाँचे-परखे कारीगर जुड़ रहे हैं। जैसे ही कोई उपलब्ध होगा, आपको सूचना मिलेगी। इस अनुरोध का कोई शुल्क नहीं।`,
+        `Aapke sheher mein verified kaarigar jud rahe hain. Jaise hi koi available hoga, aapko alert milega. Is request ka koi charge nahi.`,
+      ));
+    }
     d.lead = say(`${d.matches.length} verified ${need.toLowerCase()}s near you.`, `आपके पास ${d.matches.length} जाँचे-परखे कारीगर मिले।`, `Aapke paas ${d.matches.length} verified kaarigar mile.`);
     d.options = d.matches.map((m2, i) => ({
       id: m2.id, price: m2.base,

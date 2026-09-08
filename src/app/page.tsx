@@ -6,10 +6,10 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Footer } from '@/components/layout/Footer';
-import { ProviderCard } from '@/components/supply/ProviderCard';
 import { useDB } from '@/hooks/useDB';
 import { DIGITAL_CATS, LANGS } from '@/lib/config';
 import { detectIntent } from '@/lib/engine/intentRouter';
+import { METRO_CITIES, demoAllowed } from '@/lib/owner';
 import { cfg, money, track } from '@/lib/store';
 
 const DEMO_CHIPS = [
@@ -82,9 +82,9 @@ export default function Landing() {
               </div>
               <div className="herostats">
                 <div><b>12</b><span>Indian languages</span></div>
-                <div><b>{ready && db ? db.providers.filter((p) => p.status === 'Verified').length : 17}+</b><span>verified doorstep partners</span></div>
-                <div><b>&lt; 8 min</b><span>avg human-agent reply</span></div>
+                <div><b>{METRO_CITIES.length}</b><span>metro cities at launch</span></div>
                 <div><b>₹0</b><span>to start — 50 free credits</span></div>
+                <div><b>100%</b><span>approval before any payment</span></div>
               </div>
               <p className="small muted mt">Sign in with Google. Your data is backed up automatically and stays yours.</p>
             </div>
@@ -173,14 +173,18 @@ export default function Landing() {
 
         <section className="section">
           <div className="wrap">
-            <h2>Local services at your door</h2>
+            <h2>Launching across India&rsquo;s metros</h2>
             <p className="muted">
-              Verified professionals with a visible price, distance and arrival time. You see the rating and the
-              cancellation policy before you book.
+              Doorstep services from verified professionals — visible price, distance and arrival time before you book,
+              and a rating after every job. Rolling out city by city, starting with:
             </p>
-            <div className="grid g3 mt">
-              {ready && db ? db.providers.slice(0, 3).map((p) => <ProviderCard key={p.id} p={p} />) : null}
+            <div className="chips mt">
+              {METRO_CITIES.map((c2) => <span key={c2} className="chip" style={{ cursor: 'default' }}>📍 {c2}</span>)}
             </div>
+            <p className="small muted mt">
+              Every partner is identity-verified before their first job; home services also require police verification.
+              A professional in one of these cities? <Link className="linkish" href="/partner">Apply as a partner</Link>.
+            </p>
           </div>
         </section>
 
@@ -319,11 +323,11 @@ export default function Landing() {
             <h2>Ek hi jagah. Saara kaam.</h2>
             <p className="muted">
               Create your free account with Google — 50 welcome credits, automatic backup, reminders that never
-              let a bill slip. Or explore the sandbox first.
+              let a bill slip.
             </p>
             <div className="row" style={{ justifyContent: 'center' }}>
               <Link className="btn big" href="/login">Create your free account</Link>
-              <Link className="btn ghost" href="/login?demo=1">Explore the sandbox</Link>
+              {demoAllowed() ? <Link className="btn ghost" href="/login?demo=1">Explore the sandbox</Link> : null}
             </div>
           </div>
         </section>
