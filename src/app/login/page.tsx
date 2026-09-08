@@ -1,34 +1,51 @@
 'use client';
 
-/* Demo login: pick a ready-made account (no password — everything stays in
-   this browser). Production replaces this with phone + OTP via NextAuth. */
+/* Sign in. Real users: Google via Supabase (docs/SUPABASE.md). The old
+   fabricated demo personas are kept only behind /login?demo=1 as a sandbox
+   for exploring the product — they never appear in the real flow. */
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
-import { DemoFlag } from '@/components/ui/DemoFlag';
 import { useDB } from '@/hooks/useDB';
+import { authConfigured, currentSupaUser, signInWithGoogle } from '@/lib/auth/supabase';
 import { homeFor, login } from '@/lib/auth/session';
 import { cfg, resetAll, toast } from '@/lib/store';
 import type { User } from '@/lib/types';
 
-const FLOWS = [
-  'Recharge a phone and approve the payment',
-  'Fetch and pay an electricity bill',
-  'Explain a PDF from the vault',
-  'Search trains and hit the human handover',
-  'Find an electrician and book one',
-  'Schedule a doctor appointment',
-  'Ask something odd and watch it escalate',
-  'Add a family member with permissions',
-  'Buy a credit pack',
-  'Switch subscription plan',
-  'Sign in as the electrician and accept the job',
-  'Complete it, then rate the professional',
-];
-
 export default function Login() {
   const { db, ready } = useDB();
   const router = useRouter();
+  const [demo, setDemo] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+
+  useEffect(() => {
+    setDemo(new URLSearchParams(window.location.search).get('demo') === '1');
+  }, []);
+
+  // Coming back from Google OAuth (or already signed in): go straight in.
+  // AppBoot's auth listener creates the account and restores the backup.
+  useEffect(() => {
+    if (!ready) return;
+    let alive = true;
+    (async () => {
+      const su = await currentSupaUser();
+      if (alive && su) {
+        setWaiting(true);
+        setTimeout(() => router.replace('/app/ask'), 400);
+      }
+    })();
+    return () => { alive = false; };
+  }, [ready, router]);
+
+  const google = async () => {
+    setWaiting(true);
+    const err = await signInWithGoogle();
+    if (err) {
+      setWaiting(false);
+      toast(err, 'warn');
+    }
+  };
 
   const roleLine = (u: User): string => {
     if (!db) return '';
@@ -38,7 +55,7 @@ export default function Login() {
     }
     if (u.role === 'agent') {
       const a = db.agents.find((x) => x.id === u.id);
-      return a ? `${a.cat || 'Digital agent'} · ${a.city} · ${a.online ? 'Online' : 'Offline'}` : 'Digital agent';
+      return a ? `${a.cat || 'Digital agent'} · ${a.city}` : 'Digital agent';
     }
     if (u.role === 'provider') {
       const pv = db.providers.find((x) => x.id === u.id);
@@ -49,59 +66,88 @@ export default function Login() {
 
   return (
     <>
-      <main id="main" className="wrap" style={{ padding: '2.4rem 0 4rem' }}>
-        <h1>Pick a demo account</h1>
-        <p className="muted">No password. This prototype stores everything in this browser only.</p>
-        <div className="grid g3 mt">
-          {ready && db ? db.users.map((u) => (
-            <button
-              key={u.id}
-              className="card"
-              style={{ textAlign: 'left', cursor: 'pointer', borderWidth: '1.5px' }}
-              onClick={() => {
-                const role = login(u.id);
-                if (role) router.push(homeFor(role));
-              }}
-            >
-              <div className="row">
-                <span className={'tag ' + (u.role === 'admin' ? 'stop' : u.role === 'provider' ? 'go' : u.role === 'agent' ? 'warm' : '')}>{u.role}</span>
-                {u.easy ? <span className="tag warm">Easy Mode</span> : null}
-              </div>
-              <h3 style={{ margin: '.5rem 0 .2rem' }}>{u.name}</h3>
-              <p className="small muted" style={{ margin: 0 }}>{u.city} · {roleLine(u)}</p>
-            </button>
-          )) : null}
-        </div>
-        <div className="card mt2">
-          <div className="between">
-            <div>
-              <strong>Real sign-up</strong>
-              <p className="small muted" style={{ margin: '.2rem 0 0' }}>
-                Phone number and OTP. Needs a backend — not part of this demo build.
-              </p>
+      <main id="main" className="wrap" style={{ padding: '2.4rem 0 4rem', maxWidth: demo ? undefined : 560 }}>
+        {!demo ? (
+          <>
+            <h1>Sign in to Digital Saathi</h1>
+            <p className="muted">One account for your tasks, bookings, documents, family and reminders — backed up automatically.</p>
+            <div className="card pad mt">
+              <button className="btn big" style={{ width: '100%' }} onClick={google} disabled={waiting}>
+                {waiting ? 'Opening Google…' : 'Continue with Google'}
+              </button>
+              {!authConfigured() ? (
+                <p className="small muted mt" style={{ margin: '0.8rem 0 0' }}>
+                  Google sign-in is not connected on this deployment yet — the operator needs to add the
+                  Supabase keys (see <code>docs/SUPABASE.md</code>).
+                </p>
+              ) : (
+                <p className="small muted mt" style={{ margin: '0.8rem 0 0' }}>
+                  We only receive your name and email. No passwords are stored by Digital Saathi.
+                </p>
+              )}
             </div>
-            <DemoFlag />
-          </div>
-        </div>
-        <h2 className="mt2">Twelve flows to try</h2>
-        <div className="card">
-          <ol className="small muted" style={{ columns: 2, columnGap: '2rem', margin: 0, paddingLeft: '1.1rem' }}>
-            {FLOWS.map((f) => <li key={f}>{f}</li>)}
-          </ol>
-        </div>
-        <p className="mt">
-          <button
-            className="linkish"
-            onClick={() => {
-              if (window.confirm('Wipe all demo data in this browser?')) {
-                resetAll();
-                toast('Demo data reset.', 'ok');
-              }
-            }}
-          >
-            Reset all demo data
-          </button>
-        </p>
+            <div className="card mt">
+              <strong>What you get free</strong>
+              <ul className="small muted" style={{ margin: '.4rem 0 0', paddingLeft: '1.1rem' }}>
+                <li>50 welcome credits — recharges, bill fetch, document help</li>
+                <li>Automatic cloud backup of your data</li>
+                <li>Recurring reminders so bills and recharges are never missed</li>
+                <li>Verified local professionals near your location</li>
+              </ul>
+            </div>
+            <p className="small muted mt">
+              Just exploring? <a className="linkish" href="/login?demo=1">Open the demo sandbox</a> — fabricated
+              accounts, nothing you do there is real.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1>Demo sandbox</h1>
+            <p className="muted">
+              Fabricated accounts for exploring every side of the product — customer, elderly user, agent,
+              electrician, admin. Everything stays in this browser. <a className="linkish" href="/login">Back to real sign-in</a>
+            </p>
+            <div className="grid g3 mt">
+              {ready && db ? db.users.filter((u) => !u.id.startsWith('g_')).map((u) => (
+                <button
+                  key={u.id}
+                  className="card"
+                  style={{ textAlign: 'left', cursor: 'pointer', borderWidth: '1.5px' }}
+                  onClick={() => {
+                    const role = login(u.id);
+                    if (role) router.push(homeFor(role));
+                  }}
+                >
+                  <div className="row">
+                    <span className={'tag ' + (u.role === 'admin' ? 'stop' : u.role === 'provider' ? 'go' : u.role === 'agent' ? 'warm' : '')}>{u.role}</span>
+                    {u.easy ? <span className="tag warm">Easy Mode</span> : null}
+                  </div>
+                  <h3 style={{ margin: '.5rem 0 .2rem' }}>{u.name}</h3>
+                  <p className="small muted" style={{ margin: 0 }}>{u.city} · {roleLine(u)}</p>
+                </button>
+              )) : null}
+              {ready && db && db.mode === 'real' ? (
+                <div className="card muted">
+                  This device is in real-user mode — demo personas were removed.
+                  <button className="linkish mt" onClick={() => { resetAll(); toast('Demo data seeded.', 'ok'); }}>Re-seed the demo sandbox</button>
+                </div>
+              ) : null}
+            </div>
+            <p className="mt">
+              <button
+                className="linkish"
+                onClick={() => {
+                  if (window.confirm('Wipe all demo data in this browser?')) {
+                    resetAll();
+                    toast('Demo data reset.', 'ok');
+                  }
+                }}
+              >
+                Reset all demo data
+              </button>
+            </p>
+          </>
+        )}
       </main>
       <Footer />
     </>

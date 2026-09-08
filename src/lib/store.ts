@@ -31,6 +31,15 @@ export function getDB(): DBShape {
   if (!DB.config) DB.config = JSON.parse(JSON.stringify(DEFAULT_CONFIG)) as SaathiConfig;
   if (!DB.threads) DB.threads = {};
   if (!DB.ui) DB.ui = {};
+  if (!DB.reminders) DB.reminders = [];
+  // Older saves predate provider coordinates — backfill from the seed by id.
+  if (DB.providers.some((p) => p.lat == null)) {
+    const fresh = SEED().providers;
+    DB.providers.forEach((p) => {
+      const f = fresh.find((x) => x.id === p.id);
+      if (f && p.lat == null) { p.lat = f.lat; p.lng = f.lng; }
+    });
+  }
   return DB;
 }
 
@@ -61,6 +70,12 @@ export const getVersion = () => version;
 
 export function resetAll() {
   DB = SEED();
+  commit();
+}
+
+/** Replace the whole database (backup restore / switching demo ↔ real mode). */
+export function replaceDB(next: DBShape) {
+  DB = next;
   commit();
 }
 

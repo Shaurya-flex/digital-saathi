@@ -9,8 +9,8 @@ import { useRouter } from 'next/navigation';
 import { CustomerShell } from '@/components/layout/Shell';
 import { ProviderCard } from '@/components/supply/ProviderCard';
 import { Modal } from '@/components/ui/Modal';
-import { DemoFlag } from '@/components/ui/DemoFlag';
 import { useDB } from '@/hooks/useDB';
+import { nearbyProviders, useGeo } from '@/hooks/useGeo';
 import { DIGITAL_CATS } from '@/lib/config';
 import { handleAsk } from '@/lib/engine/actions';
 import { me, money } from '@/lib/store';
@@ -22,6 +22,7 @@ export default function ServicesPage() {
   const [pin, setPin] = useState<Provider | null>(null);
   const router = useRouter();
   const u = ready ? me() : null;
+  const { geo, request, clear, busy } = useGeo();
 
   const ask = (text: string) => { handleAsk(text); router.push('/app/ask'); };
 
@@ -62,22 +63,42 @@ export default function ServicesPage() {
           ))}
         </div>
         <h3 className="mt2">Local services</h3>
-        <div className="mapbox mb">
-          <span className="pin me" style={{ left: '40%', top: '52%' }}>You</span>
-          {db.providers.map((p) => (
-            <button key={p.id}
-              className={'pin' + (p.status === 'Verified' && p.rating > 4.7 ? ' best' : '')}
-              style={{ left: p.x + '%', top: p.y + '%' }}
-              onClick={() => setPin(p)}>
-              {p.cat} {p.rating}★
-            </button>
-          ))}
-        </div>
         <div className="row mb">
-          <button className="btn ghost sm">Use my location</button>
-          <button className="btn ghost sm">Enter a locality</button>
-          <DemoFlag>Map is illustrative — Maps API required</DemoFlag>
+          <button className="btn sm" onClick={request} disabled={busy}>
+            {busy ? 'Locating…' : geo ? '📍 Update my location' : '📍 Use my location'}
+          </button>
+          {geo ? <button className="btn ghost sm" onClick={clear}>Clear location</button> : null}
+          {!geo ? <span className="small muted">Share your location to see who can reach your doorstep fastest.</span> : null}
         </div>
+        {geo ? (
+          <>
+            <h3 className="sechead">Near you — doorstep visits</h3>
+            <div className="grid g3 mb">
+              {nearbyProviders(geo, db.providers).filter(({ km }) => km <= 30).slice(0, 6).map(({ p, km }) => (
+                <div key={p.id}>
+                  <div className="between small" style={{ padding: '0 .2rem .25rem' }}>
+                    <span className="tag go">~{km < 1 ? '1' : Math.round(km)} km away</span>
+                    {km <= p.radius ? <span className="tiny muted">visits your doorstep</span> : <span className="tiny muted">outside their radius</span>}
+                  </div>
+                  <ProviderCard p={p} onBook={(pp) => ask('Need a ' + pp.cat.toLowerCase() + ' at home')} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="mapbox mb">
+            <span className="pin me" style={{ left: '40%', top: '52%' }}>You</span>
+            {db.providers.map((p) => (
+              <button key={p.id}
+                className={'pin' + (p.status === 'Verified' && p.rating > 4.7 ? ' best' : '')}
+                style={{ left: p.x + '%', top: p.y + '%' }}
+                onClick={() => setPin(p)}>
+                {p.cat} {p.rating}★
+              </button>
+            ))}
+          </div>
+        )}
+        <h3 className="sechead">All partners</h3>
         <div className="grid g3">
           {db.providers.map((p) => (
             <ProviderCard key={p.id} p={p} onBook={(pp) => ask('Need a ' + pp.cat.toLowerCase() + ' at home')} />

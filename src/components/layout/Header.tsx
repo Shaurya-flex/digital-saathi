@@ -5,6 +5,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { useNotifications } from '@/hooks/useNotifications';
 import { logout } from '@/lib/auth/session';
+import { supaSignOut } from '@/lib/auth/supabase';
+import { getDB } from '@/lib/store';
 
 export function Header() {
   const { user, ready } = useSession();
@@ -20,7 +22,7 @@ export function Header() {
         {pub ? (
           <nav className="mainnav">
             <Link href="/" className={path === '/' ? 'on' : ''}>Home</Link>
-            <Link href="/#pricing">Pricing</Link>
+            <Link href="/pricing" className={on('/pricing')}>Pricing</Link>
             <Link href="/learn" className={on('/learn')}>Learn</Link>
             <Link href="/partner" className={on('/partner')}>Service partner</Link>
             <Link href="/become-agent" className={on('/become-agent')}>Digital agent</Link>
@@ -33,7 +35,12 @@ export function Header() {
                 Alerts {unread ? <span className="tag stop">{unread}</span> : null}
               </button>
               <span className="tag plain">{user.name.split(' ')[0]} · {user.role}</span>
-              <button className="btn ghost sm" onClick={() => { logout(); router.push('/login'); }}>Switch account</button>
+              <button className="btn ghost sm" onClick={() => {
+                const real = getDB().mode === 'real';
+                logout();
+                if (real) void supaSignOut();
+                router.push('/login' + (real ? '' : '?demo=1'));
+              }}>{getDB().mode === 'real' ? 'Sign out' : 'Switch account'}</button>
             </>
           ) : (
             <>

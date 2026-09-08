@@ -14,7 +14,15 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000, pick a demo account on the login page. No password — the entire demo database lives in `localStorage` in your browser (reset it from the login page).
+Open http://localhost:3000. Real users sign in with **Google** (Supabase — see [docs/SUPABASE.md](docs/SUPABASE.md)); until those keys are configured, explore with the fabricated sandbox personas at `/login?demo=1`.
+
+## Real users
+
+- **Google sign-in** via Supabase Auth — no passwords, works on a static deploy (`src/lib/auth/supabase.ts`).
+- **Clean accounts** — the first real sign-in on a device removes all fabricated demo data; new users start with 50 welcome credits (`src/lib/auth/realUser.ts`).
+- **Automatic cloud backup** — every change is mirrored (debounced) to a per-user Supabase row protected by row-level security, and restored on any device they sign into (`src/lib/sync/backup.ts`).
+- **Doorstep matching** — customers can share device location; verified partners are ranked by real distance (haversine) with a "visits your doorstep" check against each partner's service radius (`src/hooks/useGeo.ts`).
+- **Recurring reminders** — the highest-frequency chore (forgotten recharges/bills/renewals) gets a one-tap fix: Saathi nudges when due and "Do it now" runs the task (`/app/alerts`).
 
 ## The four portals
 
@@ -46,4 +54,10 @@ Plus public pages: landing (`/`), `/learn` articles, `/partner`, `/become-agent`
 
 ## Deploying
 
-Vercel is preferred (API routes become available for real adapters): import the repo, set env vars from `.env.example`, deploy. For GitHub Pages, build a static export with `SAATHI_STATIC_EXPORT=1` and `SAATHI_BASE_PATH=/digital-saathi` (see `next.config.js`).
+**Vercel (recommended)** — API routes stay available for real payment/recharge adapters later:
+
+1. Push this repo to GitHub, then [import it on Vercel](https://vercel.com/new) (framework auto-detected).
+2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Project → Settings → Environment Variables.
+3. Deploy, then set the Vercel URL as the site URL in Supabase Auth (see [docs/SUPABASE.md](docs/SUPABASE.md)).
+
+**GitHub Pages** — fully static works too (Supabase runs client-side): build with `SAATHI_STATIC_EXPORT=1` and `SAATHI_BASE_PATH=/digital-saathi` (see `next.config.js`) and publish `out/`.

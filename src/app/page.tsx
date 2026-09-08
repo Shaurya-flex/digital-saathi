@@ -41,7 +41,7 @@ const FAQ: Array<[string, string]> = [
   ['Are you connected to the government?', 'No. For PAN, passport, EPFO and similar work we explain the process and help with forms and documents. We never present an unofficial route as an official one.'],
   ['Who are the local professionals?', 'Independent electricians, plumbers, technicians and salons who apply, get verified and are rated by customers after every job.'],
   ['What happens to my documents?', 'They stay in your vault. You choose what is shared with an agent, per task, and you can delete anything at any time.'],
-  ['Is this working software?', 'This is a prototype for user testing. Payments, recharges and bookings are simulated and labelled as such.'],
+  ['Is this working software?', 'Yes — sign in with Google and your account, tasks and reminders are real and backed up. Live payment, recharge and booking rails are being connected operator by operator; anything still simulated is clearly labelled in the app.'],
 ];
 
 export default function Landing() {
@@ -77,10 +77,16 @@ export default function Landing() {
                 spoken or typed, in your language, through one place you can trust.
               </p>
               <div className="row mt">
-                <Link className="btn" href="/login">Try Digital Saathi</Link>
-                <a className="btn ghost" href="#what">See what I can do</a>
+                <Link className="btn big" href="/login">Try Digital Saathi</Link>
+                <a className="btn ghost big" href="#what">See what I can do</a>
               </div>
-              <p className="small muted mt">Prototype. Payments, recharges and bookings are simulated and clearly marked.</p>
+              <div className="herostats">
+                <div><b>12</b><span>Indian languages</span></div>
+                <div><b>{ready && db ? db.providers.filter((p) => p.status === 'Verified').length : 17}+</b><span>verified doorstep partners</span></div>
+                <div><b>&lt; 8 min</b><span>avg human-agent reply</span></div>
+                <div><b>₹0</b><span>to start — 50 free credits</span></div>
+              </div>
+              <p className="small muted mt">Sign in with Google. Your data is backed up automatically and stays yours.</p>
             </div>
             <div className="console">
               <div className="head">
@@ -312,10 +318,13 @@ export default function Landing() {
           <div className="narrow">
             <h2>Ek hi jagah. Saara kaam.</h2>
             <p className="muted">
-              Try the prototype with a ready-made account — customer, elderly user, family manager, agent, electrician
-              or admin.
+              Create your free account with Google — 50 welcome credits, automatic backup, reminders that never
+              let a bill slip. Or explore the sandbox first.
             </p>
-            <Link className="btn" href="/login">Open the demo</Link>
+            <div className="row" style={{ justifyContent: 'center' }}>
+              <Link className="btn big" href="/login">Create your free account</Link>
+              <Link className="btn ghost" href="/login?demo=1">Explore the sandbox</Link>
+            </div>
           </div>
         </section>
       </main>

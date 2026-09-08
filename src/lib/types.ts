@@ -58,6 +58,7 @@ export interface Provider {
   address_proof?: boolean; police?: boolean;
   badges: string[]; resp: number; completion: number;
   x: number; y: number; open: boolean;
+  lat?: number; lng?: number;      // real coordinates for nearby matching
   bank?: string; payout_cycle?: string;
   avail?: Record<string, string[]>;
   reviews_count?: number; rating_hist?: Record<number, number>;
@@ -218,6 +219,20 @@ export interface SaathiConfig {
 
 export interface ThreadMsg { who: 'user' | 'ai'; text: string; taskId?: string; at: string }
 
+/* Recurring reminders — the "never miss a recharge/bill again" feature.
+   `ask` is the request Saathi runs when the user taps "Do it now". */
+export interface Reminder {
+  id: string; userId: string; title: string;
+  kind: 'recharge' | 'bill' | 'renewal' | 'custom';
+  every: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  nextDue: string;                 // ISO date
+  amount?: number;
+  ask?: string;
+  lastNotified?: string;
+}
+
+export interface GeoPoint { lat: number; lng: number; at: string }
+
 /* The whole demo database — persisted to localStorage under one key,
    exactly like the validated prototype. */
 export interface DBShape {
@@ -235,7 +250,10 @@ export interface DBShape {
   ledger: LedgerEntry[];
   events: AnalyticsEvent[];
   threads: Record<string, ThreadMsg[]>;
-  ui: { svcq?: string };
+  reminders: Reminder[];
+  ui: { svcq?: string; geo?: GeoPoint };
   session: string | null;
   seededAt: string;
+  /** 'demo' = fabricated personas for exploring; 'real' = signed-in users only. */
+  mode?: 'demo' | 'real';
 }
