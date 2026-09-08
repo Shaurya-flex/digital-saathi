@@ -1,0 +1,34 @@
+/* ===== supply-side (provider + agent portals) =====
+   These classes are referenced by the prototype's portal views; the styles
+   here complete them in the same design language as the core tokens. */
+
+/* economics bar — appears wherever money is mentioned */
+.econ{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:1rem;max-width:520px}
+.econrow{display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;font-size:.98rem}
+.econrow.fee{color:var(--chilli);border-bottom:1px dashed var(--line)}
+.econrow.earn{color:var(--leaf);font-size:1.05rem}
+.econbar{height:12px;background:var(--chilli-soft);border-radius:6px;overflow:hidden;margin:.5rem 0 .6rem}
+.econbar>span{display:block;height:12px;background:var(--leaf);border-radius:6px 0 0 6px}
+
+/* urgent requests strip */
+.urgentbox{background:var(--chilli-soft);border:1.5px solid #e6b0aa;border-radius:var(--r);padding:.9rem 1rem}
+.urgentbox>strong{color:var(--chilli);display:block;margin-bottom:.5rem}
+
+/* job + agent-task cards */
+.jobcard{border-left:4px solid var(--indigo)}
+.agtask{border-left:4px solid var(--marigold)}
+
+/* filter row */
+.filtrow{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0 1rem}
+.filtrow .btn.on{background:var(--indigo);color:#fff;border-color:var(--indigo)}
+
+/* weekly schedule grid */
+.calgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.6rem;margin-top:1rem}
+.calday{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:.7rem;display:flex;flex-direction:column;gap:.35rem;align-items:flex-start}
+.calday.closed{background:#f4f2ec;opacity:.75}
+.slot{display:inline-block;background:var(--leaf-soft);color:var(--leaf);border-radius:6px;padding:.1rem .45rem;font-size:.8rem;font-weight:600}
+
+/* rating histogram */
+.ratingbar{display:flex;align-items:center;gap:.5rem;padding:.15rem 0}
+.rbtrack{flex:1;height:10px;background:#eee9df;border-radius:5px;overflow:hidden}
+.rbtrack>span{display:block;height:10px;background:var(--marigold);border-radius:5px}
