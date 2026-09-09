@@ -4,29 +4,46 @@
    background check → Active). */
 
 import { useRouter } from 'next/navigation';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { Footer } from '@/components/layout/Footer';
-import { cfg, money, mutate, toast, uid } from '@/lib/store';
+import { demoAllowed } from '@/lib/owner';
+import { submitApplication } from '@/lib/sync/requests';
+import { cfg, getDB, money, mutate, toast, uid } from '@/lib/store';
 
 export default function BecomeAgent() {
   const router = useRouter();
   const c = cfg();
+  const [sending, setSending] = useState(false);
 
-  const submit = (e: FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, string>;
-    mutate((db) => {
-      db.agents.push({
-        id: uid('a'), name: d.name, city: 'Remote', lang: (d.langs || '').split(',').map((s) => s.trim()).filter(Boolean),
-        skills: (d.skills || '').split(',').map((s) => s.trim()).filter(Boolean),
-        rating: 0, done: 0, cancel: 0, dispute: 0, sla: 'New', resp_min: 0,
-        earnings: 0, pending: 0, wk_earnings: 0,
-        verified: false, aadhaar: false, pan: false, skill_test: 'pending', bg_check: 'pending',
-        level: 'New', status: 'Active', online: false,
-      });
+    if (d.website) return; // honeypot
+    if (!/^[\d\s+‑-]{10,14}$/.test(d.phone || '')) { toast('Enter a 10-digit phone number.', 'warn'); return; }
+    setSending(true);
+    const sent = await submitApplication({
+      kind: 'agent', name: d.name, phone: d.phone, city: d.city,
+      data: { languages: d.langs, skills: d.skills, hours_per_day: d.hours },
     });
-    toast('Application received. Verification and a skills test follow.', 'ok');
-    router.push('/');
+    if (demoAllowed() && getDB().mode === 'demo') {
+      mutate((db) => {
+        db.agents.push({
+          id: uid('a'), name: d.name, city: 'Remote', lang: (d.langs || '').split(',').map((s) => s.trim()).filter(Boolean),
+          skills: (d.skills || '').split(',').map((s) => s.trim()).filter(Boolean),
+          rating: 0, done: 0, cancel: 0, dispute: 0, sla: 'New', resp_min: 0,
+          earnings: 0, pending: 0, wk_earnings: 0,
+          verified: false, aadhaar: false, pan: false, skill_test: 'pending', bg_check: 'pending',
+          level: 'New', status: 'Active', online: false,
+        });
+      });
+    }
+    setSending(false);
+    if (sent || demoAllowed()) {
+      toast('Application received! Verification and a short skills test follow — expect a call within 2 working days.', 'ok');
+      router.push('/');
+    } else {
+      toast('Could not submit right now. Please try again in a minute.', 'warn');
+    }
   };
 
   return (
@@ -59,14 +76,16 @@ export default function BecomeAgent() {
             </table>
           </div>
           <form className="card pad" onSubmit={submit}>
-            <h3>Apply</h3>
-            <label className="f">Full name</label><input type="text" name="name" required />
-            <label className="f">Phone</label><input type="tel" name="phone" required />
-            <label className="f">Languages you work in</label><input type="text" name="langs" defaultValue="Hindi, English" />
-            <label className="f">Skills</label><input type="text" name="skills" defaultValue="Travel booking, Government forms" />
-            <label className="f">Hours a day you can work</label><input type="number" name="hours" defaultValue={4} />
-            <button className="btn mt" type="submit">Submit application</button>
-            <p className="tiny muted">Identity verification and a short skills test follow. Both are simulated in this demo build.</p>
+            <h3>Apply — takes 2 minutes</h3>
+            <label className="f">Full name</label><input type="text" name="name" required maxLength={80} />
+            <label className="f">Phone (we call this number to verify)</label><input type="tel" name="phone" required inputMode="tel" placeholder="98765 43210" />
+            <label className="f">City</label><input type="text" name="city" maxLength={60} placeholder="Anywhere in India — this is remote work" />
+            <label className="f">Languages you work in</label><input type="text" name="langs" defaultValue="Hindi, English" maxLength={100} />
+            <label className="f">Skills</label><input type="text" name="skills" defaultValue="Travel booking, Government forms" maxLength={140} />
+            <label className="f">Hours a day you can work</label><input type="number" name="hours" defaultValue={4} min={1} max={12} />
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ position: 'absolute', left: '-9999px' }} aria-hidden="true" />
+            <button className="btn mt" type="submit" disabled={sending}>{sending ? 'Sending…' : 'Submit application'}</button>
+            <p className="tiny muted">Next steps: verification call → short skills test on the same call → you start picking tasks from the queue.</p>
           </form>
         </div>
       </main>

@@ -64,3 +64,56 @@ signed-in user's own row.
 
 No keys configured? Everything degrades gracefully: the app still runs, and
 `/login?demo=1` offers the fabricated sandbox personas.
+
+## 5. The operator's desk — requests + applications (SQL editor → run once)
+
+```sql
+-- Service requests: mirrored from each user's local task engine so the
+-- operator can actually deliver. Users see only their own rows; the owner
+-- accounts below see and manage everything.
+create table if not exists public.saathi_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade,
+  task_id text not null,
+  name text default '', email text default '', phone text default '',
+  city text default '', lang text default '',
+  intent text default '', category text default '', description text default '',
+  status text not null default 'Understanding',
+  result text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (user_id, task_id)
+);
+alter table public.saathi_requests enable row level security;
+
+create policy "req_insert_own" on public.saathi_requests for insert with check (auth.uid() = user_id);
+create policy "req_select_own" on public.saathi_requests for select using (auth.uid() = user_id);
+create policy "req_update_own" on public.saathi_requests for update using (auth.uid() = user_id);
+create policy "req_owner_select" on public.saathi_requests for select using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+create policy "req_owner_update" on public.saathi_requests for update using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+
+-- Partner / agent applications: anonymous inserts allowed (no sign-in
+-- barrier for professionals), readable only by the owner accounts.
+create table if not exists public.saathi_applications (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null check (kind in ('provider','agent')),
+  name text not null check (char_length(name) between 2 and 80),
+  phone text not null check (char_length(phone) between 10 and 16),
+  city text default '',
+  data jsonb default '{}'::jsonb,
+  status text not null default 'new',
+  created_at timestamptz not null default now()
+);
+alter table public.saathi_applications enable row level security;
+
+create policy "app_insert_any" on public.saathi_applications for insert to anon, authenticated with check (true);
+create policy "app_owner_select" on public.saathi_applications for select using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+create policy "app_owner_update" on public.saathi_applications for update using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+```
+
+Admin → **Requests inbox** reads these tables; user-side writes happen
+automatically from the task engine and the application forms.

@@ -36,7 +36,9 @@ export default function ProfilePage() {
             <div>
               <label className="f">Name</label>
               <input type="text" defaultValue={u.name} onBlur={(e) => mutate(() => { u.name = e.target.value || u.name; })} />
-              <label className="f">Phone</label><input type="text" defaultValue={u.phone || ''} disabled />
+              <label className="f">Phone (for service delivery calls)</label>
+              <input type="tel" defaultValue={u.phone || ''} placeholder="98765 43210" inputMode="tel"
+                onBlur={(e) => { mutate(() => { u.phone = e.target.value.trim() || undefined; }); if (e.target.value.trim()) toast('Phone saved.', 'ok'); }} />
               <label className="f">City</label>
               <select value={u.city || ''} onChange={(e) => { mutate(() => { u.city = e.target.value; }); toast('City set. Doorstep services will match here.'); }}>
                 <option value="" disabled>Choose your city</option>

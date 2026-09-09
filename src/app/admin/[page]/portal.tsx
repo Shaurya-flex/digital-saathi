@@ -5,6 +5,7 @@
    Ported 1:1 from the validated prototype (admin is English-only there). */
 
 import Link from 'next/link';
+import { RequestsInbox } from './RequestsInbox';
 import { AdminShell } from '@/components/layout/Shell';
 import { DemoFlag } from '@/components/ui/DemoFlag';
 import { StatusTag } from '@/components/ui/Tag';
@@ -43,7 +44,9 @@ export function AdminPortal({ page }: { page: string }) {
 
   let body: React.ReactNode = null;
 
-  if (page === 'users') {
+  if (page === 'requests') {
+    body = <RequestsInbox />;
+  } else if (page === 'users') {
     body = (
       <>
         <h2>Users</h2>

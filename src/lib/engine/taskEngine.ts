@@ -1,5 +1,6 @@
 import { getDB, me, uid, now, track, chargeCredits, askAloud, commit } from '../store';
 import { taskName } from '../store';
+import { recordRequest, syncRequestStatus } from '../sync/requests';
 import type { Risk, Task, TaskData, TaskStatus, ThreadMsg } from '../types';
 
 export const STATUSES: TaskStatus[] = [
@@ -58,6 +59,7 @@ export function createTask(o: CreateTaskInput): Task {
   logTask(t, 'Task created', `Intent detected: ${o.intent}. Risk level: ${t.risk_level}.`);
   db.tasks.unshift(t);
   track('task_created', { intent: o.intent });
+  recordRequest(t); // mirror to the operator's desk (real mode only, fire-and-forget)
   return t;
 }
 
@@ -70,6 +72,7 @@ export function logTask(t: Task, action: string, detail = '') {
 export function setStatus(t: Task, s: TaskStatus, detail?: string) {
   t.status = s;
   logTask(t, 'Status → ' + s, detail);
+  syncRequestStatus(t); // keep the operator's desk current (real mode only)
 }
 
 /** Plain-language trail shown as "What happened" on the task detail page. */
