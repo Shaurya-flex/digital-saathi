@@ -164,3 +164,15 @@ footer.foot a{color:#fff}
 
 .skip{position:absolute;left:-9999px}
 .skip:focus{left:1rem;top:.5rem;position:fixed;background:#fff;padding:.6rem 1rem;z-index:100;border-radius:8px}
+
+/* Google sign-in button — official white style with the multicolour G */
+.gbtn{display:flex;align-items:center;justify-content:center;gap:.7rem;width:100%;min-height:52px;
+  background:#fff;color:#1f1f1f;border:1.5px solid #d8d5cc;border-radius:999px;font-weight:600;
+  font-size:1.02rem;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.gbtn:hover{border-color:#c6c3ba;box-shadow:0 1px 6px rgba(25,27,39,.15)}
+.gbtn:disabled{opacity:.6;cursor:not-allowed}
+.gbtn svg{flex:none}
+
+/* "or" divider between sign-in methods */
+.orline{display:flex;align-items:center;gap:.8rem;margin:1.1rem 0;color:var(--ink-2);font-size:.82rem;font-weight:600}
+.orline::before,.orline::after{content:"";flex:1;height:1px;background:var(--line)}

@@ -36,6 +36,22 @@ export async function signInWithGoogle(): Promise<string | null> {
   return error ? error.message : null;
 }
 
+/** Create an account (or sign in) with name + email: Supabase emails a
+    one-tap sign-in link. No password is ever created or stored. */
+export async function signInWithEmail(email: string, name?: string): Promise<string | null> {
+  const sb = supabase();
+  if (!sb) return 'Email sign-in is not configured yet (set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY).';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+      emailRedirectTo: window.location.origin + '/login',
+      data: name ? { full_name: name } : undefined,
+    },
+  });
+  return error ? error.message : null;
+}
+
 export async function supaSignOut() {
   await supabase()?.auth.signOut();
 }
