@@ -10,11 +10,13 @@
    the whole DBShape. On sign-in, if the cloud copy is newer than what this
    device has seen, it replaces the local store before the UI settles. */
 
+import { localIdForUuid } from '../auth/realUser';
 import { supabase } from '../auth/supabase';
 import { getDB, replaceDB, subscribe, toast } from '../store';
 import type { DBShape } from '../types';
 
 const TABLE = 'saathi_backups';
+const PROFILES = 'saathi_profiles';
 let stop: (() => void) | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
 let pushing = false;
@@ -25,7 +27,18 @@ async function push(supaUserId: string) {
   pushing = true;
   try {
     const db = getDB();
-    await sb.from(TABLE).upsert({ user_id: supaUserId, db, updated_at: new Date().toISOString() });
+    const now = new Date().toISOString();
+    await sb.from(TABLE).upsert({ user_id: supaUserId, db, updated_at: now });
+    // Lightweight, listable index for Admin → Users — see docs/SUPABASE.md §6.
+    const u = db.users.find((x) => x.id === localIdForUuid(supaUserId));
+    if (u) {
+      await sb.from(PROFILES).upsert({
+        user_id: supaUserId, name: u.name, email: u.email || '', phone: u.phone || '',
+        city: u.city || '', lang: u.lang || '', role: u.role,
+        plan: u.plan || '', credits: u.credits || 0, wallet: u.wallet || 0,
+        easy: !!u.easy, updated_at: now,
+      });
+    }
   } catch { /* offline is fine — next commit retries */ }
   pushing = false;
 }

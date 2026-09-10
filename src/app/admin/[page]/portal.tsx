@@ -5,6 +5,7 @@
    Ported 1:1 from the validated prototype (admin is English-only there). */
 
 import Link from 'next/link';
+import { RealUsers } from './RealUsers';
 import { RequestsInbox } from './RequestsInbox';
 import { AdminShell } from '@/components/layout/Shell';
 import { DemoFlag } from '@/components/ui/DemoFlag';
@@ -50,6 +51,12 @@ export function AdminPortal({ page }: { page: string }) {
     body = (
       <>
         <h2>Users</h2>
+        <RealUsers />
+        <h3 className="sechead">This device&rsquo;s session</h3>
+        <p className="muted small">
+          Local to this browser only — your own admin session plus the shared demo/seed catalogue. Use the cloud
+          list above to see who has actually signed up.
+        </p>
         <div className="card scroll">
           <table>
             <tbody>

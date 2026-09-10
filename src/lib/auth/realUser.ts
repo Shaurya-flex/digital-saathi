@@ -12,7 +12,11 @@ import { getDB, addCredits, commit, replaceDB, track } from '../store';
 import type { User } from '../types';
 import type { SupaUser } from './supabase';
 
-export const realUserId = (su: SupaUser) => 'g_' + su.id.replace(/-/g, '').slice(0, 12);
+/** The local store id ('g_...') a given Supabase auth uuid maps to. Shared
+    by account bootstrap and the backup/profile mirror so both sides agree
+    on which local user record a cloud row belongs to. */
+export const localIdForUuid = (authUuid: string) => 'g_' + authUuid.replace(/-/g, '').slice(0, 12);
+export const realUserId = (su: SupaUser) => localIdForUuid(su.id);
 
 /** Make sure a store account exists for this Google user and sign it in. */
 export function ensureRealUser(su: SupaUser): User {

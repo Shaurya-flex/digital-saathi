@@ -6,6 +6,7 @@
    /login?demo=1 as a sandbox — they never appear in the real flow. */
 
 import { FormEvent, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
 import { useDB } from '@/hooks/useDB';
@@ -155,6 +156,10 @@ export default function Login() {
                 <li>Verified local professionals near your location</li>
               </ul>
             </div>
+            <p className="tiny muted mt">
+              By continuing you agree to our <Link href="/terms">Terms &amp; Conditions</Link> and{' '}
+              <Link href="/privacy">Privacy Policy</Link>.
+            </p>
             {demoAllowed() ? (
               <p className="small muted mt">
                 Just exploring? <a className="linkish" href="/login?demo=1">Open the demo sandbox</a> — fabricated

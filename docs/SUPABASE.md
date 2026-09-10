@@ -117,3 +117,41 @@ create policy "app_owner_update" on public.saathi_applications for update using 
 
 Admin → **Requests inbox** reads these tables; user-side writes happen
 automatically from the task engine and the application forms.
+
+## 6. Admin — view real users (SQL editor → run once)
+
+Lets the three owner accounts list every signed-up user and open a **read-only**
+preview of their account exactly as they see it (their tasks, wallet, documents,
+bookings) — for support and product improvement. This never lets an owner sign
+in as the user, take an action on their behalf, or reach anyone else's data —
+Row Level Security enforces that at the database level, not just in the UI.
+
+```sql
+-- Lightweight, listable index — one row per real user, upserted alongside
+-- every backup push. Keeps the Admin → Users list fast without pulling
+-- every user's full backup blob just to render a table.
+create table if not exists public.saathi_profiles (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  name text default '', email text default '', phone text default '',
+  city text default '', lang text default '', role text default 'customer',
+  plan text default '', credits integer default 0, wallet integer default 0,
+  easy boolean default false,
+  updated_at timestamptz not null default now()
+);
+alter table public.saathi_profiles enable row level security;
+
+create policy "profile_write_own" on public.saathi_profiles for insert with check (auth.uid() = user_id);
+create policy "profile_update_own" on public.saathi_profiles for update using (auth.uid() = user_id);
+create policy "profile_select_own" on public.saathi_profiles for select using (auth.uid() = user_id);
+create policy "profile_owner_select" on public.saathi_profiles for select using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+
+-- The owner accounts may also read (never write) any user's full backup, so
+-- the "View" action can show that one user's tasks/documents/bookings.
+create policy "backup_owner_select" on public.saathi_backups for select using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+```
+
+If you change the owner email list (`NEXT_PUBLIC_OWNER_EMAILS` in Vercel), update
+the email arrays in this file's policies and in section 5 to match — the app-side
+list and the database-side list are separate and both must agree.

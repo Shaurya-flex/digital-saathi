@@ -13,8 +13,10 @@ export function Header() {
   const { unread } = useNotifications();
   const path = usePathname() || '/';
   const router = useRouter();
-  const pub = !user || path === '/' || path.startsWith('/learn') || path.startsWith('/partner') || path.startsWith('/become-agent');
+  const pub = !user || path === '/' || path.startsWith('/learn') || path.startsWith('/partner')
+    || path.startsWith('/become-agent') || path.startsWith('/network') || path.startsWith('/terms') || path.startsWith('/privacy');
   const on = (p: string) => (path === p || (p !== '/' && path.startsWith(p)) ? 'on' : '');
+  const onNetwork = path.startsWith('/network') || path.startsWith('/partner') || path.startsWith('/become-agent');
   return (
     <header className="top">
       <div className="wrap bar">
@@ -24,8 +26,7 @@ export function Header() {
             <Link href="/" className={path === '/' ? 'on' : ''}>Home</Link>
             <Link href="/pricing" className={on('/pricing')}>Pricing</Link>
             <Link href="/learn" className={on('/learn')}>Learn</Link>
-            <Link href="/partner" className={on('/partner')}>Service partner</Link>
-            <Link href="/become-agent" className={on('/become-agent')}>Digital agent</Link>
+            <Link href="/network" className={onNetwork ? 'on' : ''}>Partner with us</Link>
           </nav>
         ) : null}
         <div className="row">
