@@ -9,9 +9,10 @@ import { CustomerShell } from '@/components/layout/Shell';
 import { Modal } from '@/components/ui/Modal';
 import { useDB } from '@/hooks/useDB';
 import { logout } from '@/lib/auth/session';
+import { supaSignOut } from '@/lib/auth/supabase';
 import { LANGS } from '@/lib/config';
-import { METRO_CITIES } from '@/lib/owner';
-import { me, mutate, resetAll, toast } from '@/lib/store';
+import { demoAllowed, METRO_CITIES } from '@/lib/owner';
+import { getDB, me, mutate, resetAll, toast } from '@/lib/store';
 import type { Lang } from '@/lib/types';
 
 const memLabel = (k: string) =>
@@ -85,12 +86,19 @@ export default function ProfilePage() {
         </div>
 
         <h3 className="mt2">Account</h3>
-        <div className="row">
-          <button className="btn ghost" onClick={() => { logout(); router.push('/login'); }}>Switch demo account</button>
-          <button className="btn ghost" onClick={() => {
-            if (window.confirm('Wipe all demo data in this browser?')) { resetAll(); toast('Demo data reset.', 'ok'); router.push('/'); }
-          }}>Reset all demo data</button>
-        </div>
+        {getDB().mode === 'real' ? (
+          <div className="row">
+            <button className="btn ghost" onClick={() => { const real = true; logout(); if (real) void supaSignOut(); router.push('/login'); }}>Sign out</button>
+            <a className="linkish" href="mailto:onlinedesk120@gmail.com?subject=Delete%20my%20Digital%20Saathi%20account">Delete my account</a>
+          </div>
+        ) : (
+          <div className="row">
+            <button className="btn ghost" onClick={() => { logout(); router.push('/login' + (demoAllowed() ? '?demo=1' : '')); }}>Switch demo account</button>
+            <button className="btn ghost" onClick={() => {
+              if (window.confirm('Wipe all demo data in this browser?')) { resetAll(); toast('Demo data reset.', 'ok'); router.push('/'); }
+            }}>Reset all demo data</button>
+          </div>
+        )}
 
         {adding ? (
           <Modal onClose={() => setAdding(false)}>

@@ -4,9 +4,30 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from '@/hooks/useSession';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useSiteLang } from '@/hooks/useSiteLang';
 import { logout } from '@/lib/auth/session';
 import { supaSignOut } from '@/lib/auth/supabase';
-import { getDB } from '@/lib/store';
+import { setSiteLang } from '@/lib/i18n/siteLang';
+import { getDB, mutate } from '@/lib/store';
+
+/** EN / Hinglish — always visible. For a signed-in customer it also flips
+    their in-app language field, so the two stay in sync; the full
+    12-language picker in Profile still covers everything else. */
+function LangSwitch() {
+  const { lang, ready } = useSiteLang();
+  const pick = (l: 'en' | 'hinglish') => {
+    setSiteLang(l);
+    const db = getDB();
+    const u = db.users.find((x) => x.id === db.session);
+    if (u && u.role === 'customer') mutate(() => { u.lang = l; });
+  };
+  return (
+    <div className="langswitch" role="group" aria-label="Site language">
+      <button className={ready && lang === 'en' ? 'on' : ''} onClick={() => pick('en')}>EN</button>
+      <button className={ready && lang === 'hinglish' ? 'on' : ''} onClick={() => pick('hinglish')}>Hinglish</button>
+    </div>
+  );
+}
 
 export function Header() {
   const { user, ready } = useSession();
@@ -30,6 +51,7 @@ export function Header() {
           </nav>
         ) : null}
         <div className="row">
+          <LangSwitch />
           {ready && user ? (
             <>
               <button className="linkish small" onClick={() => router.push('/app/alerts')}>

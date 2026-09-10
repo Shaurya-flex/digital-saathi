@@ -33,7 +33,7 @@ export interface PayResult { ok: boolean; paymentId?: string; error?: string }
 /** Run a real payment for a catalogue item. Resolves only after server-side
     signature verification (or with a user-readable error). */
 export async function payFor(
-  item: { kind: 'pack' | 'plan'; id: string },
+  item: { kind: 'pack' | 'plan' | 'wallet'; id: string },
   buyer: { name?: string; email?: string },
 ): Promise<PayResult> {
   try {

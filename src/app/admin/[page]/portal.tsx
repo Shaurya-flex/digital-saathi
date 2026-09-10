@@ -5,6 +5,7 @@
    Ported 1:1 from the validated prototype (admin is English-only there). */
 
 import Link from 'next/link';
+import { AdminOverview } from './AdminOverview';
 import { RealUsers } from './RealUsers';
 import { RequestsInbox } from './RequestsInbox';
 import { AdminShell } from '@/components/layout/Shell';
@@ -41,7 +42,6 @@ export function AdminPortal({ page }: { page: string }) {
   const escd = T.filter((t) => t.status === 'Escalated to human').length;
   const creditsSold = db.ledger.filter((l) => l.dir === 'credit').reduce((s, l) => s + l.amount, 0);
   const creditsUsed = db.ledger.filter((l) => l.dir === 'debit').reduce((s, l) => s + l.amount, 0);
-  const mrr = U.reduce((s, u) => s + (cfg().plans.find((p) => p.id === u.plan)?.price || 0), 0);
 
   let body: React.ReactNode = null;
 
@@ -384,35 +384,30 @@ export function AdminPortal({ page }: { page: string }) {
     );
   } else {
     // overview
-    const stats: Array<[string, React.ReactNode]> = [
-      ['Customers', U.length], ['Tasks', T.length], ['Completed', done], ['Escalated to human', escd],
-      ['Subscription revenue / month', money(mrr)], ['Credits granted', creditsSold], ['Credits consumed', creditsUsed],
-      ['Open disputes', db.disputes.filter((d) => d.status === 'Open').length],
-    ];
     const activeStatuses = STATUSES.filter((s) => T.some((t) => t.status === s));
     body = (
       <>
         <h2>Overview</h2>
-        <div className="grid g4">
-          {stats.map(([l, v]) => (
-            <div key={l} className="stat"><span className="small muted">{l}</span><b>{v}</b></div>
-          ))}
-        </div>
+        <AdminOverview />
+        <h3 className="sechead">This device&rsquo;s session</h3>
+        <p className="muted small">
+          Local to this browser only — your own admin session, not real growth. See the live numbers above for that.
+        </p>
         <div className="grid g2 mt2">
           <div className="card">
-            <h3>Margin snapshot</h3>
+            <h3>This device&rsquo;s tasks</h3>
             <table>
               <tbody>
-                <tr><th>Line</th><th>Amount</th></tr>
-                <tr><td>Subscription revenue</td><td>{money(mrr)}</td></tr>
-                <tr><td>Credit pack sales</td><td>{money(1246)}</td></tr>
-                <tr><td>Marketplace commission</td><td>{money(892)}</td></tr>
-                <tr><td>AI model cost</td><td>−{money(310)}</td></tr>
-                <tr><td>Human agent cost</td><td>−{money(760)}</td></tr>
-                <tr><td><strong>Gross margin</strong></td><td><strong>{money(mrr + 1246 + 892 - 310 - 760)}</strong></td></tr>
+                <tr><th>Metric</th><th>Value</th></tr>
+                <tr><td>Local customers</td><td>{U.length}</td></tr>
+                <tr><td>Local tasks</td><td>{T.length}</td></tr>
+                <tr><td>Completed</td><td>{done}</td></tr>
+                <tr><td>Escalated to human</td><td>{escd}</td></tr>
+                <tr><td>Credits granted</td><td>{creditsSold}</td></tr>
+                <tr><td>Credits consumed</td><td>{creditsUsed}</td></tr>
+                <tr><td>Open disputes</td><td>{db.disputes.filter((d) => d.status === 'Open').length}</td></tr>
               </tbody>
             </table>
-            <p className="tiny muted">Illustrative figures on prototype data.</p>
           </div>
           <div className="card">
             <h3>Where tasks end up</h3>

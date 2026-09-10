@@ -155,3 +155,43 @@ create policy "backup_owner_select" on public.saathi_backups for select using (
 If you change the owner email list (`NEXT_PUBLIC_OWNER_EMAILS` in Vercel), update
 the email arrays in this file's policies and in section 5 to match — the app-side
 list and the database-side list are separate and both must agree.
+
+## 7. The live marketplace — real providers and agents (SQL editor → run once)
+
+Everything a customer sees in Services (or gets matched to for a home-visit task)
+comes from these two tables once they exist. Before this, `saathi_applications`
+only recorded who applied — nothing made them bookable. Admin → Requests inbox
+→ **Approve** now inserts here directly.
+
+```sql
+create table if not exists public.saathi_providers (
+  id text primary key,
+  status text not null default 'Verified',
+  city text default '', cat text default '',
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.saathi_providers enable row level security;
+create policy "providers_public_read" on public.saathi_providers for select to anon, authenticated using (true);
+create policy "providers_owner_write" on public.saathi_providers for all using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+
+create table if not exists public.saathi_agents (
+  id text primary key,
+  status text not null default 'Active',
+  city text default '',
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.saathi_agents enable row level security;
+create policy "agents_public_read" on public.saathi_agents for select to anon, authenticated using (true);
+create policy "agents_owner_write" on public.saathi_agents for all using (
+  (auth.jwt() ->> 'email') in ('identicalinnovator@gmail.com','srajphotos42@gmail.com','onlinedesk120@gmail.com'));
+```
+
+Real customer sessions load these two tables once at sign-in (`AppBoot.tsx`) and
+use them exactly where the local demo seed used to — Services, local-task
+matching, provider cards. A new approval shows up for a customer on their next
+sign-in or app reload; there is no live push yet.

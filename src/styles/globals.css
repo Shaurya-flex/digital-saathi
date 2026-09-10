@@ -176,3 +176,8 @@ footer.foot a{color:#fff}
 /* "or" divider between sign-in methods */
 .orline{display:flex;align-items:center;gap:.8rem;margin:1.1rem 0;color:var(--ink-2);font-size:.82rem;font-weight:600}
 .orline::before,.orline::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* En / Hinglish site-language switch, always visible in the header */
+.langswitch{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
+.langswitch button{border:0;background:none;padding:.35rem .7rem;font-size:.8rem;font-weight:700;color:var(--ink-2);cursor:pointer}
+.langswitch button.on{background:var(--indigo);color:#fff}

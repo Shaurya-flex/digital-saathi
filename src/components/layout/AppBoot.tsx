@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDB } from '@/hooks/useDB';
 import { Toaster } from '@/components/ui/Toast';
 import { ModalHost } from '@/components/task/modals';
@@ -9,6 +9,7 @@ import { ensureRealUser } from '@/lib/auth/realUser';
 import { onAuthChange } from '@/lib/auth/supabase';
 import { logout } from '@/lib/auth/session';
 import { restoreBackup, startBackup, stopBackup } from '@/lib/sync/backup';
+import { fetchLiveAgents, fetchLiveProviders } from '@/lib/sync/marketplace';
 import { getDB, mutate, notify } from '@/lib/store';
 
 /* Mounted once in the root layout: keeps Easy Mode's <html data-easy> in
@@ -16,6 +17,21 @@ import { getDB, mutate, notify } from '@/lib/store';
    the Supabase session to the store, and surfaces due reminders. */
 export function AppBoot() {
   const { db, version, ready } = useDB();
+  const marketplaceLoaded = useRef(false);
+
+  // Real customers see the live, shared catalogue (docs/SUPABASE.md §7) —
+  // not a per-browser demo seed. Loaded once per session; a fresh approval
+  // shows up on the next sign-in or reload.
+  useEffect(() => {
+    if (!ready || !db || db.mode !== 'real' || marketplaceLoaded.current) return;
+    marketplaceLoaded.current = true;
+    void (async () => {
+      const [providers, agents] = await Promise.all([fetchLiveProviders(), fetchLiveAgents()]);
+      if (providers.length || agents.length) {
+        mutate((d) => { d.providers = providers; d.agents = agents; });
+      }
+    })();
+  }, [ready, db]);
 
   useEffect(() => {
     const u = db?.users.find((x) => x.id === db.session);

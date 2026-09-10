@@ -38,8 +38,8 @@ export function Footer() {
           </div>
         </div>
         <p className="tiny" style={{ color: '#8f92a3', marginTop: '1.6rem' }}>
-          Prototype build, live in select metros and expanding. Not affiliated with any government body. Simulated
-          transactions are labelled “Demo — integration required”. Part of the Moodily projects.
+          Live in select metros and expanding. Not affiliated with any government body. Simulated transactions are
+          labelled “Demo — integration required”.
         </p>
       </div>
     </footer>

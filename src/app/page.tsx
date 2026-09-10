@@ -7,32 +7,60 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Footer } from '@/components/layout/Footer';
 import { useDB } from '@/hooks/useDB';
+import { useSiteLang } from '@/hooks/useSiteLang';
 import { DIGITAL_CATS, LANGS } from '@/lib/config';
 import { detectIntent } from '@/lib/engine/intentRouter';
 import { METRO_CITIES, demoAllowed } from '@/lib/owner';
 import { cfg, money, track } from '@/lib/store';
 
-const DEMO_CHIPS = [
-  'Mera Jio recharge kar do',
-  'Electricity bill bharna hai',
-  'Delhi se Mumbai train dhoondo',
-  'Ye PDF mujhe simple Hindi mein samjhao',
-  'Mere ghar ka fan kharab hai, electrician bhejo',
-  'Kal doctor ka appointment chahiye',
-  'Ye email ka reply likh do',
-  'Passport ke liye kya documents chahiye?',
+const DEMO_CHIPS: Array<{ en: string; hinglish: string }> = [
+  { en: 'Recharge my Jio number', hinglish: 'Mera Jio recharge kar do' },
+  { en: 'Pay my electricity bill', hinglish: 'Electricity bill bharna hai' },
+  { en: 'Find a train from Delhi to Mumbai', hinglish: 'Delhi se Mumbai train dhoondo' },
+  { en: 'Explain this PDF in simple terms', hinglish: 'Ye PDF mujhe simple Hindi mein samjhao' },
+  { en: 'My fan is broken, send an electrician', hinglish: 'Mere ghar ka fan kharab hai, electrician bhejo' },
+  { en: 'I need a doctor’s appointment tomorrow', hinglish: 'Kal doctor ka appointment chahiye' },
+  { en: 'Draft a reply to this email', hinglish: 'Ye email ka reply likh do' },
+  { en: 'What documents do I need for a passport?', hinglish: 'Passport ke liye kya documents chahiye?' },
 ];
 
-const HERO_LINES: Record<string, [string, string]> = {
-  recharge: ['Jio number samajh gaya. Best plans dhoondh raha hoon…', '3 plans mile. ₹719 sabse lamba chalega — 70 din, 2GB/day.'],
-  bill: ['BSES Rajdhani ka August bill nikaal raha hoon…', '₹1,284 due hai, 12 September tak. Pay karne se pehle main poochhunga.'],
-  train: ['Delhi se Mumbai trains dekh raha hoon…', '3 trains mili. Booking ke liye ek verified agent lagega — IRCTC mujhse akele nahi hota.'],
-  local: ['Aapke area ke electricians dhoondh raha hoon…', 'Suresh Electricals — 4.8★, 25 minute mein, ₹249 se shuru.'],
-  doc: ['PDF padh raha hoon…', 'Ye 11 mahine ka rent agreement hai. ₹18,000 mahina, 2 mahine deposit, 1 mahine ka notice.'],
-  govt: ['Passport documents ki list bana raha hoon…', 'Aadhaar, birth proof, address proof aur ek self-declaration. Poori checklist neeche hai.'],
-  appt: ['Kal ke doctor slots dekh raha hoon…', 'Do slot khaali hain — 11:15 AM aur 5:40 PM.'],
-  email: ['Email padh ke reply likh raha hoon…', 'Draft taiyaar hai. Bhejne se pehle aap padh lijiye.'],
-  unknown: ['Samajh raha hoon…', 'Ye kaam AI se seedha nahi hota. Ek verified agent isse poora kar dega.'],
+const HERO_LINES: Record<string, { en: [string, string]; hinglish: [string, string] }> = {
+  recharge: {
+    en: ['Got the Jio number. Finding the best plans…', '3 plans found. ₹719 lasts the longest — 70 days, 2GB/day.'],
+    hinglish: ['Jio number samajh gaya. Best plans dhoondh raha hoon…', '3 plans mile. ₹719 sabse lamba chalega — 70 din, 2GB/day.'],
+  },
+  bill: {
+    en: ['Fetching the BSES Rajdhani bill for August…', '₹1,284 is due by 12 September. I will ask before paying.'],
+    hinglish: ['BSES Rajdhani ka August bill nikaal raha hoon…', '₹1,284 due hai, 12 September tak. Pay karne se pehle main poochhunga.'],
+  },
+  train: {
+    en: ['Looking up Delhi to Mumbai trains…', '3 trains found. Booking needs a verified agent — I cannot complete an IRCTC booking alone.'],
+    hinglish: ['Delhi se Mumbai trains dekh raha hoon…', '3 trains mili. Booking ke liye ek verified agent lagega — IRCTC mujhse akele nahi hota.'],
+  },
+  local: {
+    en: ['Finding electricians in your area…', 'Suresh Electricals — 4.8★, about 25 minutes away, from ₹249.'],
+    hinglish: ['Aapke area ke electricians dhoondh raha hoon…', 'Suresh Electricals — 4.8★, 25 minute mein, ₹249 se shuru.'],
+  },
+  doc: {
+    en: ['Reading the PDF…', 'This is an 11-month rent agreement. ₹18,000/month, 2-month deposit, 1-month notice.'],
+    hinglish: ['PDF padh raha hoon…', 'Ye 11 mahine ka rent agreement hai. ₹18,000 mahina, 2 mahine deposit, 1 mahine ka notice.'],
+  },
+  govt: {
+    en: ['Preparing your passport document checklist…', 'Aadhaar, birth proof, address proof and a self-declaration. Full checklist below.'],
+    hinglish: ['Passport documents ki list bana raha hoon…', 'Aadhaar, birth proof, address proof aur ek self-declaration. Poori checklist neeche hai.'],
+  },
+  appt: {
+    en: ['Checking tomorrow’s doctor slots…', 'Two slots are free — 11:15 AM and 5:40 PM.'],
+    hinglish: ['Kal ke doctor slots dekh raha hoon…', 'Do slot khaali hain — 11:15 AM aur 5:40 PM.'],
+  },
+  email: {
+    en: ['Reading the email and drafting a reply…', 'Draft is ready. Please read it before you send.'],
+    hinglish: ['Email padh ke reply likh raha hoon…', 'Draft taiyaar hai. Bhejne se pehle aap padh lijiye.'],
+  },
+  unknown: {
+    en: ['Working it out…', 'This needs a person to handle it safely — a verified agent can take it from here.'],
+    hinglish: ['Samajh raha hoon…', 'Ye kaam AI se seedha nahi hota. Ek verified agent isse poora kar dega.'],
+  },
 };
 
 const FAQ: Array<[string, string]> = [
@@ -46,6 +74,7 @@ const FAQ: Array<[string, string]> = [
 
 export default function Landing() {
   const { db, ready } = useDB();
+  const { lang, t } = useSiteLang();
   const [heroQ, setHeroQ] = useState<string | null>(null);
   const [heroDone, setHeroDone] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,7 +90,8 @@ export default function Landing() {
   };
 
   const it = heroQ ? detectIntent(heroQ) : null;
-  const lines = it ? HERO_LINES[it.id] || HERO_LINES.unknown : null;
+  const linesPair = it ? HERO_LINES[it.id] || HERO_LINES.unknown : null;
+  const lines = linesPair ? (lang === 'hinglish' ? linesPair.hinglish : linesPair.en) : null;
   const c = cfg();
 
   return (
@@ -71,7 +101,7 @@ export default function Landing() {
           <div className="wrap grid herogrid">
             <div>
               <p className="kicker">AI concierge · human backup · local service network</p>
-              <h1>Aap bas boliye. Digital aur daily kaam hum sambhalenge.</h1>
+              <h1>{t('Just speak. We’ll handle your digital and daily tasks.', 'Aap bas boliye. Digital aur daily kaam hum sambhalenge.')}</h1>
               <p className="lede">
                 Recharge, bills, bookings, forms, documents, appointments, shopping and local services —
                 spoken or typed, in your language, through one place you can trust.
@@ -95,9 +125,9 @@ export default function Landing() {
               </div>
               <div className="body">
                 <div className="row" style={{ gap: '1rem', alignItems: 'center' }}>
-                  <button className="mic" aria-label="Speak your request" onClick={() => heroDemo(DEMO_CHIPS[0])}>🎙️</button>
+                  <button className="mic" aria-label="Speak your request" onClick={() => heroDemo(t(DEMO_CHIPS[0].en, DEMO_CHIPS[0].hinglish))}>🎙️</button>
                   <div>
-                    <strong>Boliye, kya kaam hai?</strong>
+                    <strong>{t('What do you need?', 'Boliye, kya kaam hai?')}</strong>
                     <p className="small muted" style={{ margin: '.2rem 0 0' }}>Tap the mic, or pick a request below.</p>
                   </div>
                 </div>
@@ -129,7 +159,7 @@ export default function Landing() {
                 ) : null}
                 <div className="chips mt">
                   {DEMO_CHIPS.map((cq) => (
-                    <button key={cq} className="chip" onClick={() => heroDemo(cq)}>{cq}</button>
+                    <button key={cq.en} className="chip" onClick={() => heroDemo(t(cq.en, cq.hinglish))}>{t(cq.en, cq.hinglish)}</button>
                   ))}
                 </div>
               </div>
@@ -214,7 +244,7 @@ export default function Landing() {
                 </p>
                 <div className="row small muted"><span>About 18 minutes</span><span>·</span><span>Service fee ₹49</span><span>·</span><span>60 credits</span></div>
                 <div className="row mt">
-                  <button className="btn sm" onClick={() => heroDemo('Delhi se Mumbai train dhoondo')}>Connect me</button>
+                  <button className="btn sm" onClick={() => heroDemo(t('Find a train from Delhi to Mumbai', 'Delhi se Mumbai train dhoondo'))}>Connect me</button>
                   <button className="btn ghost sm">Cancel</button>
                 </div>
               </div>
@@ -320,7 +350,7 @@ export default function Landing() {
 
         <section className="section center">
           <div className="narrow">
-            <h2>Ek hi jagah. Saara kaam.</h2>
+            <h2>{t('Everything, in one place.', 'Ek hi jagah. Saara kaam.')}</h2>
             <p className="muted">
               Create your free account with Google — 50 welcome credits, automatic backup, reminders that never
               let a bill slip.

@@ -10,11 +10,13 @@
 
 import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
+import { useSiteLang } from '@/hooks/useSiteLang';
 import { METRO_CITIES } from '@/lib/owner';
 import { cfg, money } from '@/lib/store';
 
 export default function NetworkHub() {
   const c = cfg();
+  const { t } = useSiteLang();
   const providerKeep = Math.round((1 - c.commission.provider) * 100);
   const agentKeep = Math.round((1 - c.commission.agent) * 100);
 
@@ -24,7 +26,10 @@ export default function NetworkHub() {
         <section className="hero">
           <div className="wrap">
             <p className="kicker">One network · three sides · everyone sees the same numbers</p>
-            <h1 style={{ maxWidth: '20ch' }}>Ek network jo sabko jodta hai — jo maangta hai aur jo pura karta hai.</h1>
+            <h1 style={{ maxWidth: '22ch' }}>
+            {t('One network that connects everyone — the ones who ask, and the ones who deliver.',
+               'Ek network jo sabko jodta hai — jo maangta hai aur jo pura karta hai.')}
+          </h1>
             <p className="lede" style={{ maxWidth: '62ch' }}>
               Digital Saathi works because three kinds of people are on it: the customer who asks, the local
               professional who shows up, and the digital agent who finishes what the AI can&rsquo;t do alone. Pick

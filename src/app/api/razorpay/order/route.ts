@@ -20,7 +20,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Bad request.' }, { status: 400 });
   }
 
-  // Server-side price lookup — the single source of truth.
+  // Server-side price lookup — the single source of truth. Wallet top-ups
+  // are the one variable-amount case: the customer names their own amount
+  // (it becomes real rupees in their own wallet 1:1), so we only clamp it
+  // to a sane range rather than looking it up in a catalogue.
   let amountInr = 0;
   let label = '';
   if (body.kind === 'pack') {
@@ -29,6 +32,12 @@ export async function POST(req: Request) {
   } else if (body.kind === 'plan') {
     const plan = DEFAULT_CONFIG.plans.find((p) => p.id === body.id);
     if (plan && plan.price > 0) { amountInr = plan.price; label = plan.name + ' plan (1 month)'; }
+  } else if (body.kind === 'wallet') {
+    const requested = Math.round(Number(body.id));
+    if (Number.isFinite(requested) && requested >= 10 && requested <= 50000) {
+      amountInr = requested;
+      label = 'Wallet top-up';
+    }
   }
   if (!amountInr) {
     return NextResponse.json({ error: 'Unknown item.' }, { status: 400 });

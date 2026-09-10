@@ -1,19 +1,49 @@
 'use client';
 
 /* Wallet & credits — kept conceptually and visually apart (product rule 7).
-   Top-up packs, plan switch, approval rules, recent ledger. */
+   Wallet top-up, credit packs, plan switch, approval rules, recent ledger.
+   Every rupee or credit added here is added ONLY after Razorpay verifies
+   the payment server-side (src/app/api/razorpay/verify) — never before. */
 
 import { useState } from 'react';
 import { CustomerShell } from '@/components/layout/Shell';
 import { DemoFlag } from '@/components/ui/DemoFlag';
 import { useDB } from '@/hooks/useDB';
 import { payFor, paymentsLive } from '@/lib/payments/razorpay';
-import { addCredits, cfg, me, money, mutate, toast, track, when } from '@/lib/store';
+import { addCredits, cfg, me, money, mutate, now, toast, track, uid, when } from '@/lib/store';
+
+const WALLET_PRESETS = [200, 500, 1000, 2000];
 
 export default function WalletPage() {
   const { db, ready } = useDB();
   const u = ready ? me() : null;
   const [paying, setPaying] = useState(false);
+  const [customAmt, setCustomAmt] = useState('');
+
+  const topUpWallet = async (amountInr: number) => {
+    if (!u || !db || !amountInr || amountInr < 10) { toast('Enter at least ₹10.', 'warn'); return; }
+    if (!paymentsLive()) {
+      mutate(() => {
+        u.wallet = (u.wallet || 0) + amountInr;
+        db.ledger.push({ id: uid('lg'), userId: u.id, type: 'money', dir: 'credit', reason: 'Wallet top-up (simulated)', amount: amountInr, at: now() });
+      });
+      toast(money(amountInr) + ' added. Payment was simulated.', 'ok');
+      return;
+    }
+    setPaying(true);
+    const r = await payFor({ kind: 'wallet', id: String(amountInr) }, { name: u.name, email: u.email });
+    setPaying(false);
+    if (r.ok) {
+      mutate(() => {
+        u.wallet = (u.wallet || 0) + amountInr;
+        db.ledger.push({ id: uid('lg'), userId: u.id, type: 'money', dir: 'credit', reason: `Wallet top-up · paid (${r.paymentId})`, amount: amountInr, at: now() });
+      });
+      track('wallet_topup', { amountInr, paymentId: r.paymentId });
+      toast(money(amountInr) + ' added to your wallet. Payment received — thank you!', 'ok');
+    } else {
+      toast(r.error || 'Payment did not complete. Nothing was added.', 'warn');
+    }
+  };
 
   const body = !u || !db ? null : (() => {
     const led = db.ledger.filter((l) => l.userId === u.id).slice(-12).reverse();
@@ -46,6 +76,22 @@ export default function WalletPage() {
             professionals. One is never converted into the other.
           </p>
         </div>
+
+        <h3 className="mt2">Add money to your wallet</h3>
+        <p className="muted small">This is real money for bills, recharges and service partners — not credits.</p>
+        <div className="grid g4">
+          {WALLET_PRESETS.map((amt) => (
+            <button key={amt} className="btn ghost mt" disabled={paying} onClick={() => void topUpWallet(amt)}>{money(amt)}</button>
+          ))}
+        </div>
+        <div className="row mt" style={{ maxWidth: 360 }}>
+          <input type="number" min={10} max={50000} placeholder="Custom amount (₹)" value={customAmt}
+            onChange={(e) => setCustomAmt(e.target.value)} />
+          <button className="btn sm" disabled={paying || !customAmt} onClick={() => { void topUpWallet(Math.round(Number(customAmt))); setCustomAmt(''); }}>Add</button>
+        </div>
+        {paymentsLive()
+          ? <p className="tiny muted mt">UPI, cards, netbanking and wallets via Razorpay. Verified server-side before your wallet updates.</p>
+          : <p className="tiny mt"><DemoFlag>Payments simulated — Razorpay keys not configured yet</DemoFlag></p>}
 
         <h3 className="mt2">Top up credits</h3>
         <div className="grid g4">
