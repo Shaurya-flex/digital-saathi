@@ -10,7 +10,9 @@ import { accessToken, authConfigured } from '@/lib/auth/supabase';
 import { toast } from '@/lib/store';
 
 interface Status {
-  supabase: boolean; database: boolean; anthropic: boolean; razorpay: boolean; paymentsLive: boolean;
+  supabase: boolean; database: boolean; anthropic: boolean; openrouter: boolean; sarvam: boolean;
+  aiProvider: 'anthropic' | 'openrouter' | 'sarvam' | null;
+  razorpay: boolean; paymentsLive: boolean;
   models: { light: string; standard: string; reasoning: string }; owners: number;
 }
 
@@ -75,7 +77,8 @@ export function SetupPanel() {
           <div className="grid g4 mt">
             <div className="stat"><span className="small muted">Sign-in &amp; data (Supabase)</span><b style={{ fontSize: '1rem', paddingTop: '.4rem' }}>{badge(status.supabase)}</b></div>
             <div className="stat"><span className="small muted">Database setup (DATABASE_URL)</span><b style={{ fontSize: '1rem', paddingTop: '.4rem' }}>{badge(status.database, 'Ready', 'Not set')}</b></div>
-            <div className="stat"><span className="small muted">Saathi AI (Anthropic)</span><b style={{ fontSize: '1rem', paddingTop: '.4rem' }}>{badge(status.anthropic)}</b></div>
+            <div className="stat"><span className="small muted">Saathi AI ({status.aiProvider || 'no provider'})</span><b style={{ fontSize: '1rem', paddingTop: '.4rem' }}>{badge(Boolean(status.aiProvider), 'Live', 'No key')}</b></div>
+            <div className="stat"><span className="small muted">Indian-language speech (Sarvam)</span><b style={{ fontSize: '1rem', paddingTop: '.4rem' }}>{badge(status.sarvam)}</b></div>
             <div className="stat"><span className="small muted">Payments (Razorpay)</span><b style={{ fontSize: '1rem', paddingTop: '.4rem' }}>{badge(status.razorpay && status.paymentsLive, 'Live', status.razorpay ? 'Keys set, not switched on' : 'Not set')}</b></div>
           </div>
           <p className="tiny muted mt">

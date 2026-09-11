@@ -10,7 +10,8 @@ import { onAuthChange } from '@/lib/auth/supabase';
 import { logout } from '@/lib/auth/session';
 import { restoreBackup, startBackup, stopBackup } from '@/lib/sync/backup';
 import { fetchLiveAgents, fetchLiveProviders } from '@/lib/sync/marketplace';
-import { getDB, mutate, notify } from '@/lib/store';
+import { getDB, mutate, notify, setSpeakOverride } from '@/lib/store';
+import { sarvamSpeak } from '@/lib/ai/speech';
 
 /* Mounted once in the root layout: keeps Easy Mode's <html data-easy> in
    sync, restarts the live-tracker ticker when tracked tasks exist, binds
@@ -18,6 +19,13 @@ import { getDB, mutate, notify } from '@/lib/store';
 export function AppBoot() {
   const { db, version, ready } = useDB();
   const marketplaceLoaded = useRef(false);
+
+  // Natural Indian-language read-aloud (Sarvam) when the deployment has it;
+  // the browser's own voice remains the fallback inside speakNow.
+  useEffect(() => {
+    setSpeakOverride(sarvamSpeak);
+    return () => setSpeakOverride(null);
+  }, []);
 
   // Real customers see the live, shared catalogue (docs/SUPABASE.md §7) —
   // not a per-browser demo seed. Loaded once per session; a fresh approval

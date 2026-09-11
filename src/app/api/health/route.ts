@@ -32,7 +32,10 @@ export async function GET() {
     supabase: has('NEXT_PUBLIC_SUPABASE_URL') && has('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
     database,
     installed,
-    ai: has('ANTHROPIC_API_KEY'),
+    ai: has('ANTHROPIC_API_KEY') || has('OPENROUTER_API_KEY') || has('SARVAM_API_KEY'),
+    aiProviders: (['ANTHROPIC_API_KEY', 'OPENROUTER_API_KEY', 'SARVAM_API_KEY'] as const)
+      .filter(has).map((k) => k.replace('_API_KEY', '').toLowerCase()),
+    speech: has('SARVAM_API_KEY'),
     razorpay: has('RAZORPAY_KEY_ID') && has('RAZORPAY_KEY_SECRET'),
     paymentsLive: (process.env.NEXT_PUBLIC_PAYMENTS_LIVE || '') === '1',
   });

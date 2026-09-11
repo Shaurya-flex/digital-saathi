@@ -151,10 +151,14 @@ export function onToast(fn: (t: ToastMsg) => void): () => void {
 }
 
 /* ---------- speech (browser TTS via the tts adapter contract) ---------- */
-export function speakNow(text: string, langIdx?: number) {
+/* A better voice can be plugged in (Sarvam, registered by AppBoot). It is
+   tried first; if it cannot play, the browser's own synthesis speaks. */
+type Speaker = (text: string, lang: string) => Promise<boolean>;
+let speakOverride: Speaker | null = null;
+export function setSpeakOverride(fn: Speaker | null) { speakOverride = fn; }
+
+function browserSpeak(text: string, idx: number) {
   try {
-    const u = me();
-    const idx = langIdx ?? (u && u.lang === 'hi' ? 1 : u && u.lang === 'hinglish' ? 2 : 0);
     window.speechSynthesis.cancel();
     const ut = new SpeechSynthesisUtterance(String(text).replace(/<[^>]+>/g, ' '));
     ut.lang = idx ? 'hi-IN' : 'en-IN';
@@ -163,6 +167,17 @@ export function speakNow(text: string, langIdx?: number) {
   } catch {
     toast('Read-aloud not available in this browser.');
   }
+}
+
+export function speakNow(text: string, langIdx?: number) {
+  const u = me();
+  const idx = langIdx ?? (u && u.lang === 'hi' ? 1 : u && u.lang === 'hinglish' ? 2 : 0);
+  const lang = langIdx == null ? (u?.lang || 'en') : (langIdx === 1 ? 'hi' : langIdx === 2 ? 'hinglish' : 'en');
+  if (speakOverride) {
+    void speakOverride(text, lang).then((ok) => { if (!ok) browserSpeak(text, idx); });
+    return;
+  }
+  browserSpeak(text, idx);
 }
 export function askAloud(text: string) {
   const u = me();
