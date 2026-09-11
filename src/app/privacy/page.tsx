@@ -1,7 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
 
-export const metadata = { title: 'Privacy Policy — Digital Saathi' };
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description: 'What Digital Saathi collects (name, email, task content, documents you choose to share, optional location), why, who it is shared with, how long it is kept, and how to delete your data.',
+  alternates: { canonical: '/privacy' },
+};
 
 export default function Privacy() {
   return (

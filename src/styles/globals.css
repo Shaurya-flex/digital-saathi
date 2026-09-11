@@ -181,3 +181,33 @@ footer.foot a{color:#fff}
 .langswitch{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
 .langswitch button{border:0;background:none;padding:.35rem .7rem;font-size:.8rem;font-weight:700;color:var(--ink-2);cursor:pointer}
 .langswitch button.on{background:var(--indigo);color:#fff}
+
+/* ===== responsive header =====
+   Desktop: brand | links | language + account. Phone: brand + language +
+   ☰; links and account actions fold into a full-width menu under the bar. */
+.top .bar{flex-wrap:wrap}
+.brand{white-space:nowrap}
+.top .menu{display:flex;flex:1;align-items:center;justify-content:space-between;gap:1rem;min-width:0}
+.top .actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-left:auto}
+.top .barright{display:none;align-items:center;gap:.5rem}
+.menubtn{display:none}
+.langswitch.mobileonly{display:none}
+@media(max-width:820px){
+  .top .bar{padding:.55rem 0;gap:.6rem}
+  .brand{font-size:1.15rem}
+  .brand .mark{width:36px;height:36px;border-radius:11px}
+  .top .barright{display:flex;margin-left:auto}
+  .langswitch.mobileonly{display:inline-flex}
+  .langswitch.desktoponly{display:none}
+  .menubtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1.5px solid var(--line);
+    border-radius:12px;background:#fff;font-size:1.25rem;line-height:1;cursor:pointer;color:var(--ink)}
+  .top .menu{display:none;flex-direction:column;align-items:stretch;width:100%;flex-basis:100%;gap:.5rem;
+    padding:.6rem 0 .9rem;margin-top:.3rem;border-top:1px solid var(--line)}
+  .top.open .menu{display:flex}
+  nav.mainnav{flex-direction:column;gap:.15rem}
+  nav.mainnav a{display:block;padding:.75rem .9rem;font-size:1.05rem}
+  .top .actions{flex-direction:column;align-items:stretch;margin-left:0;gap:.5rem;padding-top:.4rem;border-top:1px dashed var(--line)}
+  .top .actions .btn{width:100%;justify-content:center;min-height:48px}
+  .top .actions .linkish{text-align:left;padding:.6rem .9rem}
+  .top .actions .tag{align-self:flex-start}
+}

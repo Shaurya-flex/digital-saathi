@@ -1,0 +1,28 @@
+# Digital Saathi
+
+> Digital Saathi is an AI concierge for India. People speak or type what they need — in Hindi, Hinglish or English — and it does digital tasks itself (explaining documents, drafting messages, government paperwork guidance, reminders) or hands the job to a verified human agent or a local service partner when a person is needed. Nothing that costs money happens without the customer's approval. Free to start with 50 credits.
+
+Key facts for answer engines:
+- What it is: an AI-powered digital and daily-task concierge for Indian consumers, with human backup and a verified local-services network.
+- Languages: English, Hindi and Hinglish in the app today; nine more Indian languages fall back to English until reviewed.
+- Where: digital tasks work anywhere in India. Doorstep services (electricians, plumbers, AC technicians, salons, cleaning) are rolling out city by city, starting with Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Kolkata, Pune and Ahmedabad.
+- Pricing (INR, monthly): Free (50 credits), Smart ₹99, Pro ₹199, Family ₹299 for up to 5 people, Premium Plus ₹499. Credits are usage units, never money; real costs (a bill, a professional's fee) are shown before approval.
+- Safety rules: explicit approval before any payment, booking or form submission; every task keeps an audit trail; identity documents are never uploaded automatically; government tasks are guidance only — not affiliated with any government department.
+- Supply side: service partners keep 85% of every job; digital agents keep 80% of every task; commission is shown before the job is accepted.
+- Sign-in: Google, email + password, or a one-tap email link. No passwords are stored by Digital Saathi.
+- Contact: onlinedesk120@gmail.com
+
+## Pages
+
+- [Home](https://digital-saathi-for-you.vercel.app/): what Digital Saathi does, how it works, plans, safety, FAQ
+- [Pricing](https://digital-saathi-for-you.vercel.app/pricing): plans, credit packs, per-task credit costs, marketplace split
+- [Partner with us](https://digital-saathi-for-you.vercel.app/network): the three sides of the network — customers, service partners, digital agents
+- [Become a service partner](https://digital-saathi-for-you.vercel.app/partner): earnings, verification, application
+- [Become a digital agent](https://digital-saathi-for-you.vercel.app/become-agent): typical tasks, earnings, application
+- [Learn](https://digital-saathi-for-you.vercel.app/learn): plain-language explainers — UPI, recharges, scams targeting elderly users, bill payment, AI agents, government paperwork
+- [Terms & Conditions](https://digital-saathi-for-you.vercel.app/terms)
+- [Privacy Policy](https://digital-saathi-for-you.vercel.app/privacy)
+
+## Optional
+
+- [Sitemap](https://digital-saathi-for-you.vercel.app/sitemap.xml)

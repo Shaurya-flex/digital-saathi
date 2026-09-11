@@ -11,6 +11,8 @@ import { useSiteLang } from '@/hooks/useSiteLang';
 import { DIGITAL_CATS, LANGS } from '@/lib/config';
 import { detectIntent } from '@/lib/engine/intentRouter';
 import { METRO_CITIES, demoAllowed } from '@/lib/owner';
+import { FAQ, faqJsonLd, serviceJsonLd } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { cfg, money, track } from '@/lib/store';
 
 const DEMO_CHIPS: Array<{ en: string; hinglish: string }> = [
@@ -63,14 +65,6 @@ const HERO_LINES: Record<string, { en: [string, string]; hinglish: [string, stri
   },
 };
 
-const FAQ: Array<[string, string]> = [
-  ['Is this a chatbot?', 'No. A chatbot answers. Saathi carries out the task, and hands it to a person when it cannot.'],
-  ['What if the AI gets it wrong?', 'Anything with money, identity or a booking needs your explicit approval first. You can also set your own rules, like auto-approving recharges under ₹500.'],
-  ['Are you connected to the government?', 'No. For PAN, passport, EPFO and similar work we explain the process and help with forms and documents. We never present an unofficial route as an official one.'],
-  ['Who are the local professionals?', 'Independent electricians, plumbers, technicians and salons who apply, get verified and are rated by customers after every job.'],
-  ['What happens to my documents?', 'They stay in your vault. You choose what is shared with an agent, per task, and you can delete anything at any time.'],
-  ['Is this working software?', 'Yes — sign in with Google and your account, tasks and reminders are real and backed up. Live payment, recharge and booking rails are being connected operator by operator; anything still simulated is clearly labelled in the app.'],
-];
 
 export default function Landing() {
   const { db, ready } = useDB();
@@ -97,6 +91,8 @@ export default function Landing() {
   return (
     <>
       <main id="main">
+        <JsonLd data={serviceJsonLd()} />
+        <JsonLd data={faqJsonLd()} />
         <section className="hero">
           <div className="wrap grid herogrid">
             <div>

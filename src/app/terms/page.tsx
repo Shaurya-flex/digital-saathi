@@ -1,7 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
 
-export const metadata = { title: 'Terms & Conditions — Digital Saathi' };
+export const metadata: Metadata = {
+  title: 'Terms & Conditions',
+  description: 'How Digital Saathi works: credits vs money, approval before any payment, Razorpay payments, how the service grows city by city, refunds and disputes, and the grievance officer contact.',
+  alternates: { canonical: '/terms' },
+};
 
 export default function Terms() {
   return (
