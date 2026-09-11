@@ -61,13 +61,13 @@ const LANG_NAME: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: 'AI is not configured on this deployment.' }, { status: 503 });
-  }
   const caller = await callerFromRequest(req);
   if (!caller) {
     return NextResponse.json({ error: 'Please log in to use Saathi AI.' }, { status: 401 });
+  }
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: 'AI is not configured on this deployment.' }, { status: 503 });
   }
 
   let body: { kind?: string; input?: string; lang?: string; easy?: boolean; name?: string; city?: string };
