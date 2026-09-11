@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { AdminOverview } from './AdminOverview';
 import { RealUsers } from './RealUsers';
 import { RequestsInbox } from './RequestsInbox';
+import { SetupPanel } from './SetupPanel';
 import { AdminShell } from '@/components/layout/Shell';
 import { DemoFlag } from '@/components/ui/DemoFlag';
 import { StatusTag } from '@/components/ui/Tag';
@@ -322,6 +323,7 @@ export function AdminPortal({ page }: { page: string }) {
     body = (
       <>
         <h2>Integrations</h2>
+        <SetupPanel />
         <p className="muted small">Every outside service sits behind an adapter. Replace the adapter, and nothing else in the app changes.</p>
         <div className="card scroll">
           <table>

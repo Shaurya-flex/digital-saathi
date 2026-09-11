@@ -26,7 +26,9 @@ export const TRACKS: Record<'provider' | 'agent', TrackStage[]> = {
 };
 
 export function startTrack(t: Task, kind: 'provider' | 'agent') {
-  t.data.track = { kind, stage: TRACKS[kind][0].k, startedAt: Date.now(), mock: true };
+  // Real accounts never get a pretend professional/agent marching through
+  // stages on a timer — the stage only moves when a real person acts.
+  t.data.track = { kind, stage: TRACKS[kind][0].k, startedAt: Date.now(), mock: getDB().mode !== 'real' };
   t.data.phase = 'tracking';
 }
 

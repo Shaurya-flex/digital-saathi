@@ -156,6 +156,21 @@ If you change the owner email list (`NEXT_PUBLIC_OWNER_EMAILS` in Vercel), updat
 the email arrays in this file's policies and in section 5 to match — the app-side
 list and the database-side list are separate and both must agree.
 
+## 0. The easy way — one click from the admin desk
+
+Everything in sections 3, 5, 6 and 7 below can be created (and safely re-created)
+by the owner from **Admin → Integrations → Run database setup**. It needs one
+server-side variable in Vercel:
+
+- `DATABASE_URL` — Supabase → Project Settings → Database → Connection string →
+  URI. Pick the **pooler** address (Session or Transaction pooler), not the
+  direct one, because Vercel functions reach Supabase over IPv4.
+
+The setup route (`src/app/api/admin/migrate/route.ts`) generates the
+owner-email policies from `NEXT_PUBLIC_OWNER_EMAILS`, so the database and the
+app can never disagree about who is an admin — re-run it whenever that list
+changes. The SQL below is the same thing, for anyone who prefers the editor.
+
 ## 7. The live marketplace — real providers and agents (SQL editor → run once)
 
 Everything a customer sees in Services (or gets matched to for a home-visit task)

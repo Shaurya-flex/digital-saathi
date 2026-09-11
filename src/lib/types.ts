@@ -117,6 +117,7 @@ export interface TaskData {
   trail?: TrailStep[];
   track?: TrackState | null;
   reviewed?: boolean;
+  aiCostPaise?: number;      // running AI spend on this task, from the audit trail
   // intent-specific scratch
   number?: string; operator?: string;
   bill?: { kind: string; biller: string; ca: string; amount: number; due: string; period: string };

@@ -1,8 +1,12 @@
 import { getDB, me, money, notify, taskName, track, uid, now, chargeCredits, askAloud, commit } from '../store';
 import { say, T } from '../i18n/useT';
-import { setStatus } from './taskEngine';
+import { setStatus, step } from './taskEngine';
 import { startTrack, ensureTicker } from './tracker';
 import type { Task, WorkStep } from '../types';
+
+/* Intents whose execution below is a simulation of a rail we have not
+   connected yet. In real mode they must never touch a real wallet. */
+const SIMULATED_RAILS = new Set(['recharge', 'bill', 'appt']);
 
 /* Execution state machine per intent. Steps play out visibly (progress bar +
    step list in the user's language); money and credits only move after the
@@ -53,6 +57,23 @@ export function execute(t: Task) {
   const u = me();
   if (!u) return;
   const d = t.data;
+  if (getDB().mode === 'real' && SIMULATED_RAILS.has(t.intent)) {
+    // The request is already on the operator's desk (recordRequest at
+    // creation). Say so honestly; charge nothing until a person delivers.
+    d.phase = 'done';
+    d.work = null;
+    d.result = say(
+      'Got it. The Digital Saathi team will complete this for you and confirm here and on WhatsApp. Nothing has been charged yet.',
+      'समझ गया। डिजिटल साथी टीम यह आपके लिए पूरा करेगी और यहाँ और व्हाट्सऐप पर पुष्टि करेगी। अभी कोई पैसा नहीं कटा है।',
+      'Samajh gaya. Digital Saathi team ye aapke liye poora karegi aur yahan aur WhatsApp par confirm karegi. Abhi koi paisa nahi kata hai.',
+    );
+    step(t, say('Sent to the Digital Saathi team', 'डिजिटल साथी टीम को भेजा', 'Digital Saathi team ko bheja'), 'ok');
+    setStatus(t, 'Escalated to human', 'Real mode: no live rail for this yet — routed to the operator desk, nothing charged');
+    notify(u.id, say('We have your request', 'आपका अनुरोध मिल गया', 'Aapka request mil gaya'), taskName(t), 'info');
+    commit();
+    askAloud(d.result);
+    return;
+  }
   if (t.user_price && (u.wallet || 0) < t.user_price) {
     d.phase = 'failed';
     d.needMoney = true;

@@ -1,20 +1,24 @@
 'use client';
 
-/* Sign in / create account. Real users: Google (one tap) or name + email
-   (magic sign-in link) via Supabase — docs/SUPABASE.md. No passwords are
-   ever created or stored. The fabricated demo personas are kept only behind
-   /login?demo=1 as a sandbox — they never appear in the real flow. */
+/* Log in / Create account. Three real paths, all via Supabase:
+   Google (one tap), email + password, or an emailed one-tap link.
+   No password ever touches Digital Saathi's own servers — Supabase holds
+   it. Owner emails land on the admin desk; everyone else on Ask Saathi.
+   The fabricated demo personas stay behind /login?demo=1 as a sandbox. */
 
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Footer } from '@/components/layout/Footer';
 import { useDB } from '@/hooks/useDB';
-import { authConfigured, currentSupaUser, signInWithEmail, signInWithGoogle } from '@/lib/auth/supabase';
+import {
+  authConfigured, currentSupaUser, requestPasswordReset, signInWithEmail,
+  signInWithGoogle, signInWithPassword, signUpWithPassword, updatePassword,
+} from '@/lib/auth/supabase';
 import { homeFor, login } from '@/lib/auth/session';
 import { demoAllowed } from '@/lib/owner';
-import { cfg, resetAll, toast } from '@/lib/store';
-import type { User } from '@/lib/types';
+import { cfg, getDB, resetAll, toast } from '@/lib/store';
+import type { Role, User } from '@/lib/types';
 
 /* Official multicolour Google "G". */
 function GoogleG() {
@@ -28,54 +32,118 @@ function GoogleG() {
   );
 }
 
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/** AppBoot's auth listener creates the local account a moment after
+    Supabase signs the user in; wait for it so the role-based landing page
+    does not bounce back to /login. */
+async function waitForRole(): Promise<Role | null> {
+  for (let i = 0; i < 40; i++) {
+    const db = getDB();
+    const u = db.users.find((x) => x.id === db.session);
+    if (u) return u.role;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  return null;
+}
+
 export default function Login() {
   const { db, ready } = useDB();
   const router = useRouter();
   const [demo, setDemo] = useState(false);
+  const [reset, setReset] = useState(false);
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [waiting, setWaiting] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [emailBusy, setEmailBusy] = useState(false);
-  const [linkSentTo, setLinkSentTo] = useState<string | null>(null);
+  const [password, setPassword] = useState('');
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    setDemo(demoAllowed() && new URLSearchParams(window.location.search).get('demo') === '1');
+    const q = new URLSearchParams(window.location.search);
+    setDemo(demoAllowed() && q.get('demo') === '1');
+    setReset(q.get('reset') === '1');
+    if (q.get('mode') === 'signup') setMode('signup');
   }, []);
 
-  // Coming back from Google OAuth or the email link (or already signed in):
-  // go straight in. AppBoot's auth listener creates the account and restores
-  // the backup.
+  const enter = async () => {
+    setWaiting(true);
+    const role = await waitForRole();
+    router.replace(role ? homeFor(role) : '/app/ask');
+  };
+
+  // Coming back from Google OAuth, an email link, or already signed in.
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || reset) return;
     let alive = true;
     (async () => {
       const su = await currentSupaUser();
-      if (alive && su) {
-        setWaiting(true);
-        setTimeout(() => router.replace('/app/ask'), 400);
-      }
+      if (alive && su) void enter();
     })();
     return () => { alive = false; };
-  }, [ready, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, reset]);
 
   const google = async () => {
     setWaiting(true);
     const err = await signInWithGoogle();
-    if (err) {
-      setWaiting(false);
-      toast(err, 'warn');
+    if (err) { setWaiting(false); toast(err, 'warn'); }
+  };
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    const em = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(em)) { toast('Please enter a valid email address.', 'warn'); return; }
+    if (password.length < 8) { toast('Password must be at least 8 characters.', 'warn'); return; }
+    setBusy(true);
+    if (mode === 'login') {
+      const err = await signInWithPassword(em, password);
+      setBusy(false);
+      if (err) { toast(err.includes('Invalid') ? 'Wrong email or password.' : err, 'warn'); return; }
+      await enter();
+    } else {
+      const r = await signUpWithPassword(em, password, name.trim() || undefined);
+      setBusy(false);
+      if (r.error) { toast(r.error, 'warn'); return; }
+      if (r.needsConfirm) {
+        setNotice(`We sent a confirmation link to ${em}. Tap it, then log in with your password. Already have an account? Just log in.`);
+      } else {
+        await enter();
+      }
     }
   };
 
-  const emailSignup = async (e: FormEvent) => {
-    e.preventDefault();
-    const em = email.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { toast('Please enter a valid email address.', 'warn'); return; }
-    setEmailBusy(true);
-    const err = await signInWithEmail(em, name.trim() || undefined);
-    setEmailBusy(false);
+  const forgot = async () => {
+    const em = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(em)) { toast('Type your email above first, then tap Forgot password.', 'warn'); return; }
+    setBusy(true);
+    const err = await requestPasswordReset(em);
+    setBusy(false);
     if (err) toast(err, 'warn');
-    else setLinkSentTo(em);
+    else setNotice(`Password reset link sent to ${em}. Open it on this device to choose a new password.`);
+  };
+
+  const magicLink = async () => {
+    const em = email.trim().toLowerCase();
+    if (!EMAIL_RE.test(em)) { toast('Type your email above first.', 'warn'); return; }
+    setBusy(true);
+    const err = await signInWithEmail(em, name.trim() || undefined);
+    setBusy(false);
+    if (err) toast(err, 'warn');
+    else setNotice(`One-tap login link sent to ${em}. Open it on this device — no password needed.`);
+  };
+
+  const saveNewPassword = async (e: FormEvent) => {
+    e.preventDefault();
+    if (password.length < 8) { toast('Password must be at least 8 characters.', 'warn'); return; }
+    setBusy(true);
+    const err = await updatePassword(password);
+    setBusy(false);
+    if (err) { toast(err, 'warn'); return; }
+    toast('Password updated. Welcome back!', 'ok');
+    setReset(false);
+    await enter();
   };
 
   const roleLine = (u: User): string => {
@@ -98,41 +166,69 @@ export default function Login() {
   return (
     <>
       <main id="main" className="wrap" style={{ padding: '2.4rem 0 4rem', maxWidth: demo ? undefined : 560 }}>
-        {!demo ? (
+        {reset ? (
           <>
-            <h1>Sign in to Digital Saathi</h1>
+            <h1>Choose a new password</h1>
+            <form className="card pad mt" onSubmit={saveNewPassword}>
+              <label className="f" htmlFor="npw">New password</label>
+              <input id="npw" type="password" autoComplete="new-password" minLength={8} required
+                value={password} onChange={(e) => setPassword(e.target.value)} />
+              <button className="btn wide mt" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save and log in'}</button>
+            </form>
+          </>
+        ) : !demo ? (
+          <>
+            <h1>{mode === 'login' ? 'Log in to Digital Saathi' : 'Create your Digital Saathi account'}</h1>
             <p className="muted">One account for your tasks, bookings, documents, family and reminders — backed up automatically.</p>
+
             <div className="card pad mt">
+              <div className="filtrow" role="tablist" aria-label="Log in or create account" style={{ marginTop: 0 }}>
+                <button className={'btn ghost sm' + (mode === 'login' ? ' on' : '')} role="tab" aria-selected={mode === 'login'}
+                  onClick={() => { setMode('login'); setNotice(null); }}>Log in</button>
+                <button className={'btn ghost sm' + (mode === 'signup' ? ' on' : '')} role="tab" aria-selected={mode === 'signup'}
+                  onClick={() => { setMode('signup'); setNotice(null); }}>Create account</button>
+              </div>
+
               <button className="gbtn" onClick={google} disabled={waiting}>
                 <GoogleG />
                 {waiting ? 'Opening Google…' : 'Continue with Google'}
               </button>
 
-              <div className="orline">or create an account with email</div>
+              <div className="orline">or with email</div>
 
-              {linkSentTo ? (
+              {notice ? (
                 <div className="statebox ok">
                   <div className="bigstate">✉️ Check your email</div>
-                  <p className="sline">
-                    We sent a sign-in link to <strong>{linkSentTo}</strong>. Tap it on this device and your
-                    account opens — no password needed.
-                  </p>
-                  <button className="linkish small" onClick={() => setLinkSentTo(null)}>Use a different email</button>
+                  <p className="sline">{notice}</p>
+                  <button className="linkish small" onClick={() => setNotice(null)}>Back</button>
                 </div>
               ) : (
-                <form onSubmit={emailSignup}>
-                  <label className="f" htmlFor="suName">Your name</label>
-                  <input id="suName" type="text" autoComplete="name" placeholder="Asha Verma"
-                    value={name} onChange={(e) => setName(e.target.value)} />
+                <form onSubmit={submit}>
+                  {mode === 'signup' ? (
+                    <>
+                      <label className="f" htmlFor="suName">Your name</label>
+                      <input id="suName" type="text" autoComplete="name" placeholder="Asha Verma"
+                        value={name} onChange={(e) => setName(e.target.value)} />
+                    </>
+                  ) : null}
                   <label className="f" htmlFor="suEmail">Email</label>
                   <input id="suEmail" type="email" autoComplete="email" placeholder="you@example.com" required
                     value={email} onChange={(e) => setEmail(e.target.value)} />
-                  <button className="btn wide mt" type="submit" disabled={emailBusy}>
-                    {emailBusy ? 'Sending your link…' : 'Create account'}
+                  <label className="f" htmlFor="suPw">Password</label>
+                  <input id="suPw" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    placeholder={mode === 'signup' ? 'At least 8 characters' : 'Your password'} minLength={8} required
+                    value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <button className="btn wide mt" type="submit" disabled={busy}>
+                    {busy ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}
                   </button>
-                  <p className="tiny muted" style={{ margin: '.5rem 0 0' }}>
-                    Already have an account? The same link signs you straight in.
-                  </p>
+                  <div className="row mt" style={{ gap: '.4rem', justifyContent: 'space-between' }}>
+                    {mode === 'login' ? (
+                      <button type="button" className="linkish small" onClick={() => void forgot()} disabled={busy}>Forgot password?</button>
+                    ) : <span />}
+                    <button type="button" className="linkish small" onClick={() => void magicLink()} disabled={busy}>
+                      Email me a one-tap login link instead
+                    </button>
+                  </div>
                 </form>
               )}
 
@@ -143,10 +239,11 @@ export default function Login() {
                 </p>
               ) : (
                 <p className="small muted mt" style={{ margin: '0.8rem 0 0' }}>
-                  We only receive your name and email. No passwords are stored by Digital Saathi.
+                  Your password is held by Supabase, never by Digital Saathi. We only keep your name and email.
                 </p>
               )}
             </div>
+
             <div className="card mt">
               <strong>What you get free</strong>
               <ul className="small muted" style={{ margin: '.4rem 0 0', paddingLeft: '1.1rem' }}>
@@ -172,7 +269,7 @@ export default function Login() {
             <h1>Demo sandbox</h1>
             <p className="muted">
               Fabricated accounts for exploring every side of the product — customer, elderly user, agent,
-              electrician, admin. Everything stays in this browser. <a className="linkish" href="/login">Back to real sign-in</a>
+              electrician, admin. Everything stays in this browser. <a className="linkish" href="/login">Back to real login</a>
             </p>
             <div className="grid g3 mt">
               {ready && db ? db.users.filter((u) => !u.id.startsWith('g_')).map((u) => (

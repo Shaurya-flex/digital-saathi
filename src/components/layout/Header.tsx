@@ -54,6 +54,10 @@ export function Header() {
           <LangSwitch />
           {ready && user ? (
             <>
+              {user.role === 'admin' ? <Link className="btn ghost sm" href="/admin/overview">Admin desk</Link>
+                : user.role === 'provider' ? <Link className="btn ghost sm" href="/provider/dash">Partner desk</Link>
+                : user.role === 'agent' ? <Link className="btn ghost sm" href="/agent/dash">Agent desk</Link>
+                : null}
               <button className="linkish small" onClick={() => router.push('/app/alerts')}>
                 Alerts {unread ? <span className="tag stop">{unread}</span> : null}
               </button>
@@ -67,8 +71,8 @@ export function Header() {
             </>
           ) : (
             <>
-              <Link className="btn ghost sm" href="/login">Sign in</Link>
-              <Link className="btn sm" href="/login">Try Digital Saathi</Link>
+              <Link className="btn ghost sm" href="/login">Log in</Link>
+              <Link className="btn sm" href="/login?mode=signup">Create account</Link>
             </>
           )}
         </div>

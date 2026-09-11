@@ -2,6 +2,8 @@ import { getDB, me, money, notify, commit, askAloud } from '../store';
 import { say } from '../i18n/useT';
 import { recharge, bills, travel } from '../adapters';
 import { finishNow, setStatus, step } from './taskEngine';
+import { runAI } from './ai';
+import { aiAvailable } from '../ai/client';
 import type { ClarifyQuestion, Task } from '../types';
 
 /* Planning: clarification questions (one at a time, big tap targets) and
@@ -60,6 +62,12 @@ export function planTask(t: Task) {
           { l: say('Day after', 'परसों', 'Parson'), v: 'day-after' },
         ] },
     ];
+  } else if (t.intent === 'doc' && aiAvailable()) {
+    // Real AI can read whatever the person pastes — no vault upload needed.
+    d.qs = [{ id: 'doctext', type: 'text', ph: 'Paste the text here…',
+      en: 'Paste the text of the paper here, or tell me what it says',
+      hi: 'कागज़ का टेक्स्ट यहाँ चिपकाइए, या बताइए उसमें क्या लिखा है',
+      hin: 'Kagaz ka text yahan paste kijiye, ya bataiye usme kya likha hai' }];
   } else {
     d.qs = [];
   }
@@ -157,6 +165,13 @@ export function buildOptions(t: Task) {
     d.lead = say('Free slots with Dr. Meera Joshi.', 'डॉ. मीरा जोशी के खाली समय।', 'Dr. Meera Joshi ke khaali time.');
     d.options = ['11:15 AM', '5:40 PM', '7:00 PM'].map((s) => ({ id: s, title: s, sub: say('General physician', 'जनरल फिजिशियन', 'General physician'), price: null }));
   } else if (t.intent === 'doc') {
+    if (a.doctext) {
+      runAI(t, 'doc_summary', a.doctext, () => finishNow(t, say(
+        'I could not read the paper right now. Try again in a minute, or ask a Digital Saathi agent.',
+        'अभी कागज़ नहीं पढ़ पाया। एक मिनट बाद फिर कोशिश कीजिए, या साथी एजेंट से पूछिए।',
+        'Abhi kagaz nahi padh paya. Ek minute baad phir try kijiye, ya Saathi agent se poochhiye.')));
+      return;
+    }
     const docs = db.documents.filter((x) => x.userId === t.user_id);
     d.lead = say('Which paper should I read?', 'कौन सा कागज़ पढ़ूँ?', 'Kaun sa kagaz padhun?');
     d.options = docs.map((x) => ({ id: x.id, title: x.name, sub: x.cat, price: null }));
@@ -164,27 +179,42 @@ export function buildOptions(t: Task) {
       return finishNow(t, say('Your vault is empty. Add a paper first, then ask me again.', 'आपकी तिजोरी खाली है। पहले कागज़ जोड़िए, फिर पूछिए।', 'Aapki vault khaali hai. Pehle kagaz jodiye, phir poochhiye.'));
     }
   } else if (t.intent === 'govt') {
-    return finishNow(t, /passport/i.test(t.description)
+    const govtCanned = /passport/i.test(t.description)
       ? say('For a passport you need: Aadhaar, date-of-birth proof, address proof from the last three months, and photos. Apply on Passport Seva, pay the fee, then attend the appointment with the originals. I am not a government office — I prepare your checklist and help fill the form, you submit it.',
             'पासपोर्ट के लिए चाहिए: आधार, जन्म तिथि का प्रमाण, तीन महीने के अंदर का पता प्रमाण, और फोटो। पासपोर्ट सेवा पर आवेदन कीजिए, फीस भरिए, फिर मूल कागज़ों के साथ अपॉइंटमेंट पर जाइए। मैं सरकारी दफ़्तर नहीं हूँ — मैं सूची बनाता हूँ और फॉर्म भरने में मदद करता हूँ, जमा आप करेंगे।',
             'Passport ke liye chahiye: Aadhaar, janm tithi ka proof, teen mahine ke andar ka address proof, aur photo. Passport Seva par apply kijiye, fees bhariye, phir original kagaz ke saath appointment par jaiye. Main sarkari daftar nahi hoon — main list banata hoon aur form bharne mein madad karta hoon, jama aap karenge.')
       : say('Here is the process, the papers you need, and where to apply. I can prepare the checklist and help fill the form. The submission stays with you.',
             'यह रही प्रक्रिया, ज़रूरी कागज़ और आवेदन की जगह। सूची और फॉर्म में मैं मदद करूँगा। जमा आप ही करेंगे।',
-            'Ye rahi process, zaroori kagaz aur apply ki jagah. List aur form mein main madad karunga. Jama aap hi karenge.'));
+            'Ye rahi process, zaroori kagaz aur apply ki jagah. List aur form mein main madad karunga. Jama aap hi karenge.');
+    if (aiAvailable()) { runAI(t, 'govt', t.description, () => finishNow(t, govtCanned)); return; }
+    return finishNow(t, govtCanned);
   } else if (t.intent === 'email') {
-    return finishNow(t, say('Draft ready. Read it before you send — I have not sent anything.',
+    const emailCanned = say('Draft ready. Read it before you send — I have not sent anything.',
       'मसौदा तैयार है। भेजने से पहले पढ़ लीजिए — मैंने कुछ नहीं भेजा है।',
-      'Draft taiyaar hai. Bhejne se pehle padh lijiye — maine kuch nahi bheja hai.'));
+      'Draft taiyaar hai. Bhejne se pehle padh lijiye — maine kuch nahi bheja hai.');
+    if (aiAvailable()) { runAI(t, 'draft', t.description, () => finishNow(t, emailCanned)); return; }
+    return finishNow(t, emailCanned);
   } else if (t.intent === 'shop') {
-    return finishNow(t, say('Three options compared on warranty, service and running cost. Prices move daily and I have not bought anything.',
+    const shopCanned = say('Three options compared on warranty, service and running cost. Prices move daily and I have not bought anything.',
       'तीन विकल्प — वारंटी, सर्विस और खर्च के हिसाब से। दाम रोज़ बदलते हैं, और मैंने कुछ खरीदा नहीं है।',
-      'Teen option — warranty, service aur kharch ke hisaab se. Daam roz badalte hain, aur maine kuch khareeda nahi hai.'));
+      'Teen option — warranty, service aur kharch ke hisaab se. Daam roz badalte hain, aur maine kuch khareeda nahi hai.');
+    if (aiAvailable()) { runAI(t, 'research', t.description, () => finishNow(t, shopCanned)); return; }
+    return finishNow(t, shopCanned);
   } else if (t.intent === 'remind') {
     notify(t.user_id, say('Reminder set', 'याद दिलाऊँगा', 'Yaad dilaunga'), t.description, 'info');
     return finishNow(t, say('I will remind you three days before, and again on the day.',
       'तीन दिन पहले और उसी दिन फिर याद दिलाऊँगा।', 'Teen din pehle aur usi din phir yaad dilaunga.'));
   } else {
-    // unknown — low confidence: fail softly and offer a person instead of guessing
+    // unknown: with real AI, answer it; otherwise fail softly and offer a person
+    if (aiAvailable()) { runAI(t, 'ask', t.description, () => { softFail(t); commit(); }); return; }
+    softFail(t);
+  }
+  commit();
+}
+
+/** Low confidence and no AI: fail softly and offer a person instead of guessing. */
+function softFail(t: Task) {
+  const d = t.data;
     d.options = [];
     d.needsHuman = true;
     d.phase = 'failed';
@@ -193,8 +223,6 @@ export function buildOptions(t: Task) {
     d.failHi = 'मैं ठीक से समझ नहीं पाया, इसलिए अंदाज़े से नहीं करूँगा। दूसरे शब्दों में दोबारा बोलिए, या किसी व्यक्ति को दे दीजिए।';
     d.failHin = 'Main theek se samajh nahi paya, isliye andaaze se nahi karunga. Dusre shabdon mein dobara boliye, ya kisi insaan ko de dijiye.';
     setStatus(t, 'Failed', 'Low confidence — offered a human');
-  }
-  commit();
 }
 
 export type ClarifyQ = ClarifyQuestion;
