@@ -121,16 +121,32 @@ function statements(): string[] {
 }
 
 export async function POST(req: Request) {
-  const caller = await callerFromRequest(req);
-  if (!caller || !caller.owner) {
-    return NextResponse.json({ error: 'Owner account required.' }, { status: 401 });
-  }
   const url = process.env.DATABASE_URL;
   if (!url) {
     return NextResponse.json({ error: 'DATABASE_URL is not set on this deployment.' }, { status: 503 });
   }
-  const pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false }, max: 1 });
-  const client = await pool.connect().catch((e: Error) => { throw e; });
+  const pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false }, max: 1, connectionTimeoutMillis: 10000 });
+  let client;
+  try {
+    client = await pool.connect();
+  } catch (e) {
+    await pool.end().catch(() => undefined);
+    const msg = e instanceof Error ? e.message : 'Could not connect to the database.';
+    return NextResponse.json({ error: 'Database unreachable: ' + msg }, { status: 502 });
+  }
+  // First-run bootstrap: until the schema exists there is nothing an owner
+  // policy could protect, and the statements are a fixed, idempotent schema
+  // — so the very first install may run without a login (the classic
+  // install-page pattern). After that, only an owner account can re-run it.
+  const installed = Boolean((await client.query("select to_regclass('public.saathi_profiles') as t")).rows[0]?.t);
+  if (installed) {
+    const caller = await callerFromRequest(req);
+    if (!caller || !caller.owner) {
+      client.release();
+      await pool.end();
+      return NextResponse.json({ error: 'Owner account required.' }, { status: 401 });
+    }
+  }
   const list = statements();
   let done = 0;
   try {
