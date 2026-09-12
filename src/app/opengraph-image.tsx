@@ -3,7 +3,7 @@ import { ImageResponse } from 'next/og';
 /* The preview card for WhatsApp, Google, X and LinkedIn shares. Generated at
    build time from brand tokens — no design file to keep in sync. */
 
-export const alt = 'Digital Saathi — Just speak. We’ll handle your digital and daily tasks.';
+export const alt = 'Digital Saathi — your business, expertise or knowledge, turned into a digital system that brings customers.';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -22,12 +22,12 @@ export default function OpenGraphImage() {
           }}>DS</div>
           <div style={{ fontSize: 46, fontWeight: 700 }}>Digital Saathi</div>
         </div>
-        <div style={{ fontSize: 74, fontWeight: 700, lineHeight: 1.05, maxWidth: 1040, letterSpacing: -1 }}>
-          Just speak. We’ll handle your digital and daily tasks.
+        <div style={{ fontSize: 66, fontWeight: 700, lineHeight: 1.06, maxWidth: 1060, letterSpacing: -1 }}>
+          Your business, expertise or knowledge — turned into a digital system that brings customers.
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div style={{ fontSize: 30, color: '#5a5f72', maxWidth: 820 }}>
-            Bills · Recharges · Documents · Government paperwork · Doorstep services · Hindi · Hinglish · English
+            Free Digital Audit · Google &amp; WhatsApp setup · Study material · Research &amp; AI workflows
           </div>
           <div style={{ height: 16, width: 220, borderRadius: 8, background: '#E8A33D' }} />
         </div>

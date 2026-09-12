@@ -1,51 +1,34 @@
 /* Search / answer-engine facts in one place: site identity, the canonical
    description, the FAQ (rendered on the homepage AND emitted as FAQPage
-   structured data), and JSON-LD builders. Keep the FAQ answers literal and
-   self-contained — answer engines quote them verbatim. */
+   structured data), and JSON-LD builders. Keep answers literal and
+   self-contained — answer engines quote them verbatim. Prices come from
+   src/lib/offers.ts so the structured data can never drift from the page. */
 
 import type { Article } from './articles';
-import { DEFAULT_CONFIG } from './config';
-import { METRO_CITIES } from './owner';
+import { OFFERS, SITE_FAQ, VERTICALS, type Offer, type Tx, type Vertical } from './offers';
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://digital-saathi-for-you.vercel.app').replace(/\/+$/, '');
 export const SITE_NAME = 'Digital Saathi';
-export const SITE_TITLE = 'Digital Saathi — AI concierge for India: bills, recharges, documents, doorstep services';
-export const SITE_TAGLINE = 'Just speak. We’ll handle your digital and daily tasks.';
+export const SITE_TITLE = 'Digital Saathi — Google & WhatsApp setup, study material, research and AI workflows';
+export const SITE_TAGLINE = 'Your business, expertise or knowledge — turned into a digital system that brings customers.';
 export const SITE_DESCRIPTION =
-  'Digital Saathi is an AI concierge for India. Speak or type in Hindi, Hinglish or English — recharges, bill payments, ' +
-  'document explanations, government paperwork guidance, appointments and verified doorstep services — with a human ' +
-  'agent whenever the AI should not act alone. Free to start with 50 credits. Live in Delhi NCR, Mumbai, Bengaluru, ' +
-  'Hyderabad, Chennai, Kolkata, Pune and Ahmedabad.';
+  'Digital Saathi turns offline businesses, professional expertise and complex knowledge into digital systems that attract ' +
+  'customers, save time and keep working. Google Business Profile and WhatsApp Business setup for local businesses from ₹1,999, ' +
+  'study material and past-paper analysis for coaching institutes from ₹2,999 a chapter, and competitor research, content ' +
+  'systems and AI workflow automation for creators, consultants and startups. Start with a free Digital Audit; prices are ' +
+  'shown upfront and every deliverable is checked by a person.';
 export const SITE_KEYWORDS = [
-  'Digital Saathi', 'AI concierge India', 'digital services India', 'Hindi voice assistant', 'Hinglish assistant',
-  'pay electricity bill online', 'mobile recharge assistant', 'government form help India', 'PAN card help',
-  'passport documents checklist', 'explain document in Hindi', 'electrician near me', 'plumber near me',
-  'home services Delhi NCR', 'home services Mumbai', 'home services Bengaluru', 'digital help for elderly parents',
-  'family concierge India', 'digital agent jobs India', 'service partner jobs India',
+  'Digital Saathi', 'free digital audit', 'Google Business Profile setup India', 'Google Maps listing for business',
+  'WhatsApp Business setup', 'WhatsApp catalogue setup', 'local business digitization India', 'coaching centre marketing',
+  'self-study library marketing', 'salon Google Maps listing', 'gym Google Maps listing', 'small business website India',
+  'study material for coaching institutes', 'PYQ analysis', 'worksheets and quizzes for teachers', 'white-label study material',
+  'YouTube channel audit', 'competitor research India', 'content engine for creators', 'AI workflow automation India',
 ];
 export const CONTACT_EMAIL = 'onlinedesk120@gmail.com';
 export const LAUNCH_DATE = '2026-09-05';
 
-export const FAQ: Array<[string, string]> = [
-  ['What is Digital Saathi?',
-    'Digital Saathi is an AI-powered digital concierge for India. You speak or type what you need — in Hindi, Hinglish or English — and it does digital tasks itself (explaining documents, drafting messages, government paperwork guidance, reminders) or hands the job to a verified human agent or a local service partner when a person is needed. Nothing that costs money happens without your approval.'],
-  ['Is this a chatbot?',
-    'No. A chatbot answers. Saathi carries out the task, and hands it to a person when it cannot.'],
-  ['What if the AI gets it wrong?',
-    'Anything with money, identity or a booking needs your explicit approval first. You can also set your own rules, like auto-approving recharges under ₹500.'],
-  ['Which cities is Digital Saathi available in?',
-    `Digital tasks work anywhere in India. Doorstep services are rolling out city by city, starting with ${METRO_CITIES.join(', ')}, as verified partners join.`],
-  ['How much does Digital Saathi cost?',
-    'Signing up is free and comes with 50 credits. Plans start at ₹99 a month (Smart); the Family plan is ₹299 a month for up to five people. Real-world costs like a bill or a professional’s fee are shown before you approve them and are never mixed with credits.'],
-  ['Are you connected to the government?',
-    'No. For PAN, passport, EPFO and similar work we explain the process and help with forms and documents. We never present an unofficial route as an official one.'],
-  ['Who are the local professionals?',
-    'Independent electricians, plumbers, technicians and salons who apply, get verified and are rated by customers after every job.'],
-  ['What happens to my documents?',
-    'They stay in your vault. You choose what is shared with an agent, per task, and you can delete anything at any time.'],
-  ['Is this working software?',
-    'Yes — sign in with Google, email and password, or a one-tap email link, and your account, tasks and reminders are real and backed up. Live payment, recharge and booking rails are being connected operator by operator; anything still simulated is clearly labelled in the app.'],
-];
+/** English question/answer pairs, as emitted in FAQPage data. */
+export const FAQ: Array<[string, string]> = SITE_FAQ.map(([q, a]) => [q.en, a.en]);
 
 const ORG_ID = SITE_URL + '/#organization';
 const SITE_ID = SITE_URL + '/#website';
@@ -60,9 +43,14 @@ export function organizationJsonLd() {
     logo: SITE_URL + '/opengraph-image',
     email: CONTACT_EMAIL,
     slogan: SITE_TAGLINE,
+    description: SITE_DESCRIPTION,
     areaServed: { '@type': 'Country', name: 'India' },
+    knowsAbout: [
+      'Google Business Profile', 'WhatsApp Business', 'Local search', 'Study material design', 'Past-paper analysis',
+      'Competitor research', 'Content strategy', 'Workflow automation',
+    ],
     contactPoint: [{
-      '@type': 'ContactPoint', email: CONTACT_EMAIL, contactType: 'customer support',
+      '@type': 'ContactPoint', email: CONTACT_EMAIL, contactType: 'sales',
       availableLanguage: ['English', 'Hindi'], areaServed: 'IN',
     }],
   };
@@ -81,38 +69,79 @@ export function websiteJsonLd() {
   };
 }
 
+const offerPage = (o: Offer) => (o.vertical === 'all' ? `${SITE_URL}/pricing` : `${SITE_URL}/services/${o.vertical}`);
+
+function offerJsonLd(o: Offer) {
+  const spec = o.price === 0 ? { price: '0', priceCurrency: 'INR' } : {
+    priceSpecification: {
+      '@type': o.monthly ? 'UnitPriceSpecification' : 'PriceSpecification',
+      priceCurrency: 'INR',
+      ...(o.exact ? { price: o.price } : { minPrice: o.price }),
+      ...(o.monthly ? { unitCode: 'MON', unitText: 'month' } : {}),
+    },
+  };
+  return {
+    '@type': 'Offer',
+    name: o.name.en,
+    description: o.summary.en,
+    url: `${offerPage(o)}#${o.id}`,
+    ...spec,
+    itemOffered: { '@type': 'Service', name: o.name.en, description: o.summary.en },
+    seller: { '@id': ORG_ID },
+  };
+}
+
+/** The whole catalogue, for the homepage. */
 export function serviceJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: 'Digital Saathi — AI concierge and doorstep services',
-    serviceType: 'Digital concierge, bill and recharge assistance, document help, government paperwork guidance, home services',
+    '@id': SITE_URL + '/#services',
+    name: 'Digital Saathi business services',
+    serviceType: VERTICALS.map((v) => v.name.en),
     provider: { '@id': ORG_ID },
     url: SITE_URL,
     description: SITE_DESCRIPTION,
-    availableLanguage: ['English', 'Hindi', 'Hinglish'],
-    areaServed: [
-      { '@type': 'Country', name: 'India' },
-      ...METRO_CITIES.map((c) => ({ '@type': 'City', name: c, containedInPlace: { '@type': 'Country', name: 'India' } })),
-    ],
-    offers: DEFAULT_CONFIG.plans.map((p) => ({
-      '@type': 'Offer',
-      name: p.name + ' plan',
-      price: String(p.price),
-      priceCurrency: 'INR',
-      url: SITE_URL + '/pricing',
-      description: `${p.credits.toLocaleString('en-IN')} credits a month` + (p.seats > 1 ? `, up to ${p.seats} people` : ''),
-    })),
+    areaServed: { '@type': 'Country', name: 'India' },
+    availableLanguage: ['English', 'Hindi'],
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Digital Saathi packages',
+      itemListElement: [
+        ...VERTICALS.map((v) => ({
+          '@type': 'OfferCatalog', name: v.name.en,
+          itemListElement: OFFERS.filter((o) => o.vertical === v.id).map(offerJsonLd),
+        })),
+        { '@type': 'OfferCatalog', name: 'For every client', itemListElement: OFFERS.filter((o) => o.vertical === 'all').map(offerJsonLd) },
+      ],
+    },
   };
 }
 
-export function faqJsonLd() {
+/** One service line, for its own page. */
+export function verticalJsonLd(v: Vertical) {
+  const url = `${SITE_URL}/services/${v.id}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': url + '#service',
+    name: v.name.en,
+    description: v.promise.en,
+    audience: { '@type': 'Audience', audienceType: v.audience.en },
+    provider: { '@id': ORG_ID },
+    url,
+    areaServed: { '@type': 'Country', name: 'India' },
+    offers: OFFERS.filter((o) => o.vertical === v.id).map(offerJsonLd),
+  };
+}
+
+export function faqJsonLd(items: Array<[Tx, Tx]> = SITE_FAQ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQ.map(([q, a]) => ({
-      '@type': 'Question', name: q,
-      acceptedAnswer: { '@type': 'Answer', text: a },
+    mainEntity: items.map(([q, a]) => ({
+      '@type': 'Question', name: q.en,
+      acceptedAnswer: { '@type': 'Answer', text: a.en },
     })),
   };
 }

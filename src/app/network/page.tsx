@@ -117,8 +117,8 @@ export default function NetworkHub() {
 
         <section className="section">
           <div className="wrap">
-            <h2>Where the physical network is live</h2>
-            <p className="muted">Doorstep services are onboarding partners metro by metro:</p>
+            <h2>Where partner onboarding starts</h2>
+            <p className="muted">Doorstep services will open metro by metro once verified partners join, starting with:</p>
             <div className="chips mt">
               {METRO_CITIES.map((m) => <span key={m} className="chip" style={{ cursor: 'default' }}>📍 {m}</span>)}
             </div>

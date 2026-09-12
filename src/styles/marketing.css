@@ -1,0 +1,113 @@
+/* ===== business-services pages: home, services, pricing, free audit =====
+   Built on the prototype tokens in globals.css (indigo, marigold, leaf,
+   paper; Baloo 2 + Mukta). No new colours — only new arrangements. */
+
+.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);margin:0 0 .5rem}
+.hero2{padding:3rem 0 2.4rem}
+.hero2 h1{max-width:19ch;text-wrap:balance}
+.hero2 .lede{font-size:1.16rem;max-width:56ch;color:var(--ink-2)}
+.trustrow{display:flex;flex-wrap:wrap;gap:.35rem 1rem;margin:1.1rem 0 0;padding:0;list-style:none;font-size:.9rem;color:var(--ink-2)}
+.trustrow li::before{content:"✓";color:var(--leaf);font-weight:700;margin-right:.35rem}
+h2.sec{text-wrap:balance;margin-bottom:.3rem}
+.secintro{color:var(--ink-2);max-width:62ch;margin:0 0 1.2rem}
+
+/* example audit scorecard (hero) */
+.scorecard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.scorecard .schead{display:flex;justify-content:space-between;align-items:center;gap:.6rem;padding:.75rem 1.1rem;background:var(--indigo);color:#fff}
+.scorecard .schead small{opacity:.82;font-size:.78rem}
+.scorecard .scbody{padding:1rem 1.1rem 1.2rem}
+.scoreline{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.6rem}
+.scoreline b{font-family:"Baloo 2";font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.checks{list-style:none;margin:0;padding:0}
+.checks li{display:flex;justify-content:space-between;align-items:center;gap:.8rem;padding:.42rem 0;border-bottom:1px dashed var(--line);font-size:.93rem}
+.checks li:last-child{border-bottom:0}
+.pill{display:inline-flex;align-items:center;padding:.05rem .55rem;border-radius:999px;font-size:.74rem;font-weight:700;white-space:nowrap}
+.pill.ok{background:var(--leaf-soft);color:var(--leaf)}
+.pill.fix{background:var(--chilli-soft);color:var(--chilli)}
+.pill.part{background:var(--marigold-soft);color:#8a5a05}
+.fixes{margin:.9rem 0 0;padding:.75rem .9rem;background:var(--marigold-soft);border-radius:12px;font-size:.92rem}
+.fixes ol{margin:.35rem 0 0;padding-left:1.2rem}
+
+/* who we work with */
+.vcard{display:flex;flex-direction:column;gap:.45rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:1.35rem}
+.vcard h3{font-size:1.3rem;margin:0}
+.vcard .who{font-size:.9rem;color:var(--ink-2);margin:0}
+.vcard .from{font-family:"Baloo 2";font-size:1.05rem;color:var(--indigo);margin:.2rem 0 0}
+.vcard .more{margin-top:auto;padding-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* packages */
+.offer{display:flex;flex-direction:column;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r-lg);padding:1.3rem}
+.offer.flag{border-color:var(--indigo);box-shadow:var(--shadow)}
+.offer .tiername{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.offer h3{margin:.25rem 0 .15rem;font-size:1.2rem}
+.offer .offerprice{font-family:"Baloo 2";font-size:1.4rem;line-height:1.15;color:var(--ink);font-variant-numeric:tabular-nums}
+.offer .osum{font-size:.93rem;color:var(--ink-2);margin:.45rem 0 0}
+.offer ul{margin:.7rem 0 .8rem;padding-left:1.1rem;font-size:.91rem}
+.offer ul li{margin:.22rem 0}
+.offer .meta{font-size:.84rem;color:var(--ink-2);border-top:1px solid var(--line);padding-top:.6rem;margin-top:auto}
+.offer .meta p{margin:.15rem 0}
+.offer .obtns{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+
+/* a real sequence, so it is numbered */
+.stepsgrid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));counter-reset:step;list-style:none;margin:0;padding:0}
+.stepsgrid li{counter-increment:step;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.1rem}
+.stepsgrid li::before{content:counter(step);display:inline-grid;place-items:center;width:1.9rem;height:1.9rem;border-radius:50%;background:var(--indigo);color:#fff;font-weight:700;font-size:.9rem;margin-bottom:.35rem}
+.stepsgrid h3{font-size:1.05rem;margin:.1rem 0 .3rem}
+.stepsgrid p{margin:0;font-size:.9rem;color:var(--ink-2)}
+
+/* always / never */
+.listbox{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:1.3rem}
+.listbox h3{margin:0}
+.ticklist,.crosslist{list-style:none;margin:.6rem 0 0;padding:0}
+.ticklist li,.crosslist li{position:relative;padding:.45rem 0 .45rem 1.7rem;border-bottom:1px solid var(--line)}
+.ticklist li:last-child,.crosslist li:last-child{border-bottom:0}
+.ticklist li::before{content:"✓";position:absolute;left:.1rem;color:var(--leaf);font-weight:700}
+.crosslist li::before{content:"✕";position:absolute;left:.15rem;color:var(--chilli);font-weight:700}
+
+/* problems we fix */
+.problems{list-style:none;margin:0;padding:0;display:grid;gap:0 2rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.problems li{padding:.75rem 0;border-bottom:1px solid var(--line);font-size:1rem}
+
+/* the service ladder */
+.ladder{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;background:var(--card)}
+.rung{display:grid;grid-template-columns:minmax(150px,230px) 1fr;gap:1rem;padding:1rem 1.2rem;border-bottom:1px solid var(--line)}
+.rung:last-child{border-bottom:0}
+.rung .rname{font-family:"Baloo 2";font-weight:700;font-size:1.1rem;line-height:1.2}
+.rung .rrange{font-variant-numeric:tabular-nums;color:var(--indigo);font-weight:600;font-size:.95rem}
+.rung .rwhat{margin:0;color:var(--ink-2);font-size:.93rem}
+.rung .roffers{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.45rem}
+.rung .roffers a{font-size:.86rem;background:var(--indigo-soft);color:var(--indigo);border-radius:999px;padding:.15rem .65rem;font-weight:600}
+.rung .roffers a:hover{text-decoration:none;background:#dfe3f6}
+@media(max-width:640px){.rung{grid-template-columns:1fr;gap:.25rem}}
+
+/* closing call to action */
+.ctaband{background:var(--indigo);color:#fff;border-radius:var(--r-lg);padding:1.8rem 1.6rem;display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center;justify-content:space-between}
+.ctaband h2{color:#fff;margin:0 0 .3rem;text-wrap:balance}
+.ctaband p{margin:0;color:#d9dcf2}
+
+/* free-audit form */
+.auditgrid{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(320px,1.1fr);gap:2rem;align-items:start}
+@media(max-width:900px){.auditgrid{grid-template-columns:1fr}}
+.formcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:1.4rem;scroll-margin-top:88px}
+.formcard h2{font-size:1.35rem}
+.stepper{display:flex;gap:.35rem;margin:0 0 .4rem}
+.stepper span{flex:1;height:6px;border-radius:3px;background:#e9e6de}
+.stepper span.on{background:var(--indigo)}
+.optgrid{display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.optcheck{display:flex;gap:.55rem;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:.6rem .75rem;cursor:pointer;background:#fff;font-size:.93rem;min-height:var(--tap)}
+.optcheck:has(input:checked){border-color:var(--indigo);background:var(--indigo-soft)}
+.optcheck input{margin-top:.25rem;accent-color:var(--indigo);flex:none}
+.fieldhint{font-size:.8rem;color:var(--ink-2);margin:.25rem 0 0}
+.fielderr{font-size:.84rem;color:var(--chilli);margin:.5rem 0 0;font-weight:600}
+.hpfield{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.pricehint{background:var(--indigo-soft);border-radius:12px;padding:.8rem .95rem;font-size:.9rem}
+.pricehint table{font-size:.88rem}
+.pricehint th,.pricehint td{padding:.32rem .2rem;border-bottom:1px solid #dde0f2}
+.formnav{display:flex;justify-content:space-between;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.donebox{text-align:left}
+.donebox .bigstate{font-family:"Baloo 2";font-size:1.5rem;line-height:1.15;margin:0 0 .4rem}
+
+/* admin lead inbox */
+.chipsm{display:inline-flex;padding:.05rem .5rem;border-radius:999px;background:#f0efe9;color:var(--ink-2);font-size:.74rem;font-weight:600;margin:.1rem .25rem .1rem 0}
+.leadmeta{display:flex;flex-wrap:wrap;gap:.2rem .9rem;font-size:.84rem;color:var(--ink-2);margin:.25rem 0}
+.leadtext{font-size:.93rem;margin:.35rem 0 0;white-space:pre-wrap}

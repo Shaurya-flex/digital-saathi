@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
 import '@/styles/customer.css';
 import '@/styles/supply.css';
+import '@/styles/marketing.css';
 import { Header } from '@/components/layout/Header';
 import { AppBoot } from '@/components/layout/AppBoot';
 import { JsonLd } from '@/components/seo/JsonLd';

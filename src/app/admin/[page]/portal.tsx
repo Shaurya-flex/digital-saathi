@@ -6,6 +6,7 @@
 
 import Link from 'next/link';
 import { AdminOverview } from './AdminOverview';
+import { LeadsInbox } from './LeadsInbox';
 import { RealUsers } from './RealUsers';
 import { RequestsInbox } from './RequestsInbox';
 import { SetupPanel } from './SetupPanel';
@@ -46,7 +47,9 @@ export function AdminPortal({ page }: { page: string }) {
 
   let body: React.ReactNode = null;
 
-  if (page === 'requests') {
+  if (page === 'leads') {
+    body = <LeadsInbox />;
+  } else if (page === 'requests') {
     body = <RequestsInbox />;
   } else if (page === 'users') {
     body = (

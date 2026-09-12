@@ -1,24 +1,28 @@
 import type { MetadataRoute } from 'next';
 import { ARTICLES } from '@/lib/articles';
+import { VERTICALS } from '@/lib/offers';
 import { LAUNCH_DATE, SITE_URL } from '@/lib/seo';
 
 /* Public pages only. Private areas (/app, /admin, /provider, /agent) and
    API routes are excluded here and disallowed in robots.ts. */
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
+  const page = (path: string, priority: number, changeFrequency: 'weekly' | 'monthly' | 'yearly', lastModified = now) =>
+    ({ url: `${SITE_URL}${path}`, lastModified, changeFrequency, priority });
   const pages: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: `${SITE_URL}/pricing`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${SITE_URL}/network`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/partner`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/become-agent`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${SITE_URL}/learn`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${SITE_URL}/login`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${SITE_URL}/terms`, lastModified: new Date(LAUNCH_DATE), changeFrequency: 'yearly', priority: 0.2 },
-    { url: `${SITE_URL}/privacy`, lastModified: new Date(LAUNCH_DATE), changeFrequency: 'yearly', priority: 0.2 },
+    page('/', 1, 'weekly'),
+    page('/audit', 0.9, 'monthly'),
+    page('/services', 0.9, 'monthly'),
+    ...VERTICALS.map((v) => page(`/services/${v.id}`, 0.9, 'monthly')),
+    page('/pricing', 0.9, 'monthly'),
+    page('/learn', 0.6, 'weekly'),
+    page('/network', 0.4, 'monthly'),
+    page('/partner', 0.4, 'monthly'),
+    page('/become-agent', 0.4, 'monthly'),
+    page('/login', 0.2, 'yearly'),
+    page('/terms', 0.2, 'yearly'),
+    page('/privacy', 0.2, 'yearly'),
   ];
-  ARTICLES.forEach((a) => pages.push({
-    url: `${SITE_URL}/learn/${a.id}`, lastModified: new Date(LAUNCH_DATE), changeFrequency: 'monthly', priority: 0.6,
-  }));
+  ARTICLES.forEach((a) => pages.push(page(`/learn/${a.id}`, 0.5, 'monthly', new Date(LAUNCH_DATE))));
   return pages;
 }

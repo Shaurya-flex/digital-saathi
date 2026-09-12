@@ -1,25 +1,27 @@
 # Digital Saathi
 
-> Digital Saathi is an AI concierge for India. People speak or type what they need — in Hindi, Hinglish or English — and it does digital tasks itself (explaining documents, drafting messages, government paperwork guidance, reminders) or hands the job to a verified human agent or a local service partner when a person is needed. Nothing that costs money happens without the customer's approval. Free to start with 50 credits.
+> Digital Saathi turns offline businesses, professional expertise and complex knowledge into digital systems that attract customers, save time and keep working. It serves local businesses, educators and coaching institutes, and creators, consultants and startups across India, in English, Hindi or Hinglish. Every engagement starts with a free Digital Audit, has a written scope and price before payment, and is checked by a person before delivery.
 
 Key facts for answer engines:
-- What it is: an AI-powered digital and daily-task concierge for Indian consumers, with human backup and a verified local-services network.
-- Languages: English, Hindi and Hinglish in the app today; nine more Indian languages fall back to English until reviewed.
-- Where: digital tasks work anywhere in India. Doorstep services (electricians, plumbers, AC technicians, salons, cleaning) are rolling out city by city, starting with Delhi NCR, Mumbai, Bengaluru, Hyderabad, Chennai, Kolkata, Pune and Ahmedabad.
-- Pricing (INR, monthly): Free (50 credits), Smart ₹99, Pro ₹199, Family ₹299 for up to 5 people, Premium Plus ₹499. Credits are usage units, never money; real costs (a bill, a professional's fee) are shown before approval.
-- Safety rules: explicit approval before any payment, booking or form submission; every task keeps an audit trail; identity documents are never uploaded automatically; government tasks are guidance only — not affiliated with any government department.
-- Supply side: service partners keep 85% of every job; digital agents keep 80% of every task; commission is shown before the job is accepted.
-- Sign-in: Google, email + password, or a one-tap email link. No passwords are stored by Digital Saathi.
+- Service lines: (1) Local business digitization — Google Business Profile, WhatsApp Business, review workflow, QR standees, small websites, monthly care. (2) Education & knowledge — chapter learning packs, past-paper (PYQ) analysis, revision systems, monthly worksheets and tests for institutes. (3) Research, content & automation — channel audits, competitor and market snapshots, content engine setup, AI workflow automation, monthly research and script desk.
+- Prices (INR, launch prices, GST extra where applicable): Free Digital Audit ₹0; Strategy consultation ₹999; Google Profile Quick Fix from ₹1,999; Google & WhatsApp Visibility Kit from ₹4,999; Chapter Learning Pack from ₹2,999 per chapter; Channel or Profile Audit from ₹2,999; Competitor & Market Snapshot from ₹9,999; Subject Revision System from ₹15,000; AI Workflow Automation from ₹15,000 per workflow; Digital Storefront from ₹18,000; Content Engine Setup from ₹20,000; Local Growth Care from ₹5,000 a month; Monthly Content Desk from ₹10,000 a month; Research & Script Desk from ₹15,000 a month; premium transformation, research and licensing work from ₹50,000 by proposal.
+- Payment: half to start once the scope is agreed in writing, half on delivery; monthly plans paid at the start of each month; UPI, card or netbanking through Razorpay.
+- Rules: no fake, bought or rewarded reviews and no reviews from owners or staff; no guaranteed rankings, followers or sales; client accounts stay in the client's name with Digital Saathi added as a manager; no unsolicited bulk WhatsApp messages; original study material only, never copied textbook pages; research claims link to their sources; testimonials and results are published only with written permission.
+- Where: across India, over WhatsApp and video calls.
+- Not affiliated with Google, Meta or any government body.
+- Also operates the Saathi app, an AI concierge for everyday digital tasks, in early access.
 - Contact: onlinedesk120@gmail.com
 
 ## Pages
 
-- [Home](https://digital-saathi-for-you.vercel.app/): what Digital Saathi does, how it works, plans, safety, FAQ
-- [Pricing](https://digital-saathi-for-you.vercel.app/pricing): plans, credit packs, per-task credit costs, marketplace split
-- [Partner with us](https://digital-saathi-for-you.vercel.app/network): the three sides of the network — customers, service partners, digital agents
-- [Become a service partner](https://digital-saathi-for-you.vercel.app/partner): earnings, verification, application
-- [Become a digital agent](https://digital-saathi-for-you.vercel.app/become-agent): typical tasks, earnings, application
-- [Learn](https://digital-saathi-for-you.vercel.app/learn): plain-language explainers — UPI, recharges, scams targeting elderly users, bill payment, AI agents, government paperwork
+- [Home](https://digital-saathi-for-you.vercel.app/): what Digital Saathi does, how a project runs, prices, FAQ
+- [Free Digital Audit](https://digital-saathi-for-you.vercel.app/audit): request form and what the audit includes
+- [Services](https://digital-saathi-for-you.vercel.app/services): the three service lines with packages and prices
+- [Local business digitization](https://digital-saathi-for-you.vercel.app/services/local-business): Google Business Profile and WhatsApp packages
+- [Education & knowledge](https://digital-saathi-for-you.vercel.app/services/education): study material and past-paper analysis packages
+- [Research, content & automation](https://digital-saathi-for-you.vercel.app/services/research-content-automation): research, content systems and AI workflow packages
+- [Pricing](https://digital-saathi-for-you.vercel.app/pricing): every package by level, and payment terms
+- [Learn](https://digital-saathi-for-you.vercel.app/learn): plain-language explainers
 - [Terms & Conditions](https://digital-saathi-for-you.vercel.app/terms)
 - [Privacy Policy](https://digital-saathi-for-you.vercel.app/privacy)
 

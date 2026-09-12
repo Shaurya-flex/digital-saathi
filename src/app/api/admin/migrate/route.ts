@@ -5,7 +5,7 @@ import { callerFromRequest } from '@/lib/server/auth';
 
 /* One-click database setup for the owner. Creates every table the app
    reads (backups, profiles, requests, applications, live providers and
-   agents) and (re)creates the row-level-security policies, generating the
+   agents, website leads) and (re)creates the row-level-security policies, generating the
    owner-email list from NEXT_PUBLIC_OWNER_EMAILS so the database and the
    app can never disagree about who is an admin. Idempotent: run it again
    after changing the owner list. Needs DATABASE_URL (Supabase → Project
@@ -88,6 +88,32 @@ function statements(): string[] {
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now())`,
     `alter table public.saathi_agents enable row level security`,
+    // §8 free-audit leads from the public site (written by /api/leads)
+    `create table if not exists public.saathi_leads (
+      id uuid primary key default gen_random_uuid(),
+      name text not null check (char_length(name) between 2 and 80),
+      phone text not null check (char_length(phone) between 10 and 16),
+      email text not null default '' check (char_length(email) <= 120),
+      business text not null default '' check (char_length(business) <= 120),
+      city text not null check (char_length(city) between 2 and 80),
+      role text not null default '' check (char_length(role) <= 40),
+      vertical text not null default '' check (char_length(vertical) <= 40),
+      industry text not null default '' check (char_length(industry) <= 60),
+      problem text not null check (char_length(problem) between 5 and 1500),
+      objective text not null default '' check (char_length(objective) <= 800),
+      assets text[] not null default '{}' check (cardinality(assets) <= 12),
+      deadline text not null default '' check (char_length(deadline) <= 40),
+      budget text not null default '' check (char_length(budget) <= 40),
+      language text not null default '' check (char_length(language) <= 40),
+      contact_pref text not null default '' check (char_length(contact_pref) <= 20),
+      offer text not null default '' check (char_length(offer) <= 60),
+      source text not null default '' check (char_length(source) <= 200),
+      status text not null default 'new' check (char_length(status) <= 30),
+      notes text not null default '' check (char_length(notes) <= 4000),
+      consent boolean not null check (consent),
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now())`,
+    `alter table public.saathi_leads enable row level security`,
   ];
 
   const policies: Policy[] = [
@@ -115,6 +141,11 @@ function statements(): string[] {
     { table: 'saathi_providers', name: 'providers_owner_write', body: `for all using (${OWN})` },
     { table: 'saathi_agents', name: 'agents_public_read', body: 'for select to anon, authenticated using (true)' },
     { table: 'saathi_agents', name: 'agents_owner_write', body: `for all using (${OWN})` },
+
+    // Anyone may submit a lead, but only as a fresh one; only owners read or work it.
+    { table: 'saathi_leads', name: 'lead_insert_any', body: `for insert to anon, authenticated with check (status = 'new' and notes = '')` },
+    { table: 'saathi_leads', name: 'lead_owner_select', body: `for select using (${OWN})` },
+    { table: 'saathi_leads', name: 'lead_owner_update', body: `for update using (${OWN})` },
   ];
   policies.forEach((p) => out.push(...policyStatements(p)));
   return out;

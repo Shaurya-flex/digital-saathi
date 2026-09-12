@@ -1,7 +1,7 @@
 import { AdminPortal } from './portal';
 
 export function generateStaticParams() {
-  return ['requests', 'overview', 'users', 'tasks', 'providers', 'agents', 'payments', 'credits',
+  return ['leads', 'requests', 'overview', 'users', 'tasks', 'providers', 'agents', 'payments', 'credits',
     'services', 'disputes', 'analytics', 'integrations', 'audit'].map((page) => ({ page }));
 }
 

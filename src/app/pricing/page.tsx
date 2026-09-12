@@ -1,98 +1,90 @@
 'use client';
 
-/* Dedicated pricing page (linked from the main nav): plans, top-up packs,
-   per-task credit costs and the transparent marketplace split. */
+/* Pricing: every package on the service ladder, grouped by level, plus the
+   payment terms. (The Saathi app's credit plans live inside the app.) */
 
 import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
-import { cfg, money } from '@/lib/store';
-
-const NICE: Record<string, string> = {
-  ask: 'Ask anything', translate: 'Translation', doc_summary: 'Explain a document',
-  research: 'Web research', deep_research: 'Deep research', form_help: 'Form filling help',
-  recharge: 'Mobile recharge', bill: 'Bill fetch & pay', travel_search: 'Travel search',
-  booking: 'Booking assistance', human_agent: 'Verified human agent', workflow: 'Multi-step workflow',
-};
+import { CtaBand } from '@/components/marketing/CtaBand';
+import { Ladder } from '@/components/marketing/Ladder';
+import { OfferCard } from '@/components/marketing/OfferCard';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { useSiteLang } from '@/hooks/useSiteLang';
+import { OFFERS, PROMISES, TIERS, tx, verticalById } from '@/lib/offers';
+import { serviceJsonLd } from '@/lib/seo';
 
 export default function PricingPage() {
-  const c = cfg();
+  const { lang, t } = useSiteLang();
   return (
     <>
       <main id="main">
-        <section className="section">
+        <JsonLd data={serviceJsonLd()} />
+        <section className="hero2">
           <div className="wrap">
-            <h1>Simple, honest pricing</h1>
-            <p className="muted lede" style={{ maxWidth: '60ch' }}>
-              Every plan is a monthly bundle of credits — Digital Saathi usage units. You always see the credit
-              cost and any real-money cost <em>before</em> a task runs, and nothing is charged without your yes.
+            <p className="eyebrow">Pricing</p>
+            <h1>{t('Prices first. Then we talk about your budget.', 'Pehle price. Phir aapke budget ki baat.')}</h1>
+            <p className="lede">
+              {t('Launch prices in INR. Every package comes with a written scope, so you know exactly what the price covers.',
+                'Launch prices, INR mein. Har package ka likhit scope hota hai, taaki pata rahe price mein kya-kya shaamil hai.')}
             </p>
-            <div className="grid g3 mt2">
-              {c.plans.map((p) => (
-                <div key={p.id} className={'price' + (p.id === 'family' ? ' pick' : '')}>
-                  {p.id === 'family' ? <span className="tag warm">Most chosen</span> : null}
-                  <h3 style={{ marginTop: '.4rem' }}>{p.name}</h3>
-                  <div className="amt">
-                    {p.price ? money(p.price) : 'Free'}
-                    <span className="small muted" style={{ fontFamily: 'Mukta' }}>{p.price ? '/month' : ''}</span>
-                  </div>
-                  <div className="small muted">
-                    {p.credits.toLocaleString('en-IN')} credits{p.seats > 1 ? ' · up to ' + p.seats + ' people' : ''}
-                  </div>
-                  <ul>{p.perks.map((x) => <li key={x}>{x}</li>)}</ul>
-                  <Link className={'btn' + (p.id === 'family' ? '' : ' ghost')} style={{ marginTop: 'auto' }} href="/login">
-                    Choose {p.name}
-                  </Link>
-                </div>
-              ))}
-            </div>
+            <p className="small muted">
+              {t('Using the Saathi app? Its plans are inside the app, under Wallet & Credits.', 'Saathi app use karte hain? Uske plans app ke andar, Wallet & Credits mein hain.')}
+            </p>
           </div>
         </section>
+
+        <section className="section">
+          <div className="wrap">
+            <h2 className="sec">{t('All levels at a glance', 'Saare levels ek nazar mein')}</h2>
+            <Ladder lang={lang} />
+          </div>
+        </section>
+
+        {TIERS.map((tier) => {
+          const offers = OFFERS.filter((o) => o.tier === tier.id);
+          return (
+            <section key={tier.id} className="section" id={`tier-${tier.id}`}>
+              <div className="wrap">
+                <div className="between">
+                  <h2 className="sec" style={{ margin: 0 }}>{tx(tier.name, lang)}</h2>
+                  <span className="tag">{tx(tier.range, lang)}</span>
+                </div>
+                <p className="secintro mt">{tx(tier.what, lang)}</p>
+                <div className="grid g3">
+                  {offers.map((o) => (
+                    <OfferCard key={o.id} offer={o} lang={lang}
+                      context={o.vertical === 'all' ? t('Any service line', 'Kisi bhi service line ke liye') : tx(verticalById(o.vertical)!.short, lang)} />
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })}
 
         <section className="section">
           <div className="wrap grid g2">
-            <div className="card pad">
-              <h3>What tasks cost</h3>
-              <p className="small muted">Credits per task. Cheap AI work stays cheap — you never pay reasoning-model prices for a recharge.</p>
-              <table>
-                <tbody>
-                  <tr><th>Task</th><th>Credits</th></tr>
-                  {Object.entries(c.pricing).map(([k, v]) => (
-                    <tr key={k}><td>{NICE[k] || k.replace(/_/g, ' ')}</td><td>{v}</td></tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="listbox">
+              <h3>{t('How payment works', 'Payment kaise hota hai')}</h3>
+              <ul className="ticklist">
+                <li>{t('Half to start, once the scope is agreed in writing; half on delivery', 'Likhit scope tay hone par aadha shuru mein; aadha delivery par')}</li>
+                <li>{t('Monthly plans are paid at the start of each month and end with 30 days’ notice', 'Monthly plans har mahine ki shuruaat mein; 30 din pehle bata kar band')}</li>
+                <li>{t('UPI, card or netbanking, through Razorpay', 'Razorpay se UPI, card ya netbanking')}</li>
+                <li>{t('GST is added where it applies', 'GST jahan lagu ho, joda jaata hai')}</li>
+                <li>{t('Outside costs — domain, printing, ad spend, tool subscriptions — are paid at cost, in your name', 'Bahar ke kharche — domain, printing, ads, tools — jitna kharcha utna, aapke naam par')}</li>
+              </ul>
             </div>
-            <div>
-              <div className="card pad">
-                <h3>Top-up packs</h3>
-                <p className="small muted">Ran out mid-month? Packs never expire with an active plan.</p>
-                <table>
-                  <tbody>
-                    <tr><th>Credits</th><th>Price</th></tr>
-                    {c.packs.map((k) => (
-                      <tr key={k.c}><td>{k.c.toLocaleString('en-IN')}</td><td>{money(k.p)}</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="card pad mt">
-                <h3>Local services &amp; human agents</h3>
-                <p className="small">
-                  Doorstep jobs are billed at the professional&rsquo;s own price plus a {Math.round(c.commission.provider * 100)}% platform fee,
-                  shown before you book. Human-agent tasks carry a flat service fee; the agent keeps {Math.round((1 - c.commission.agent) * 100)}%.
-                  No hidden cuts, ever — the same split is shown to the professional.
-                </p>
-              </div>
+            <div className="listbox">
+              <h3>{t('Included in every price', 'Har price mein shaamil')}</h3>
+              <ul className="ticklist">{PROMISES.map((p) => <li key={p.en}>{tx(p, lang)}</li>)}</ul>
+              <p className="small muted mt">
+                {t('Full terms:', 'Poori sharten:')} <Link href="/terms#services">Terms &amp; Conditions</Link>
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="section center">
-          <div className="narrow">
-            <h2>Start free. Upgrade when it earns it.</h2>
-            <p className="muted">50 welcome credits on sign-up — enough to try a recharge, a bill fetch and a document explainer.</p>
-            <Link className="btn" href="/login">Create your free account</Link>
-          </div>
+        <section className="section" style={{ borderTop: 0, paddingTop: 0 }}>
+          <div className="wrap"><CtaBand lang={lang} /></div>
         </section>
       </main>
       <Footer />

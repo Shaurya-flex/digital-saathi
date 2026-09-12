@@ -60,7 +60,7 @@ export const AG_NAV: NavItem[] = [
   ['earnings', 'Earnings', '💰'], ['performance', 'Performance', '📈'], ['profile', 'Profile', '⚙️'],
 ];
 export const ADM_NAV: NavItem[] = [
-  ['requests', 'Requests inbox', '📥'],
+  ['leads', 'Leads', '🎯'], ['requests', 'Requests inbox', '📥'],
   ['overview', 'Overview', '📊'], ['users', 'Users', '👥'], ['tasks', 'Tasks', '🗂️'], ['providers', 'Providers', '🔧'],
   ['agents', 'Agents', '🧑‍💼'], ['payments', 'Payments', '💳'], ['credits', 'Credits & pricing', '🎫'], ['services', 'Services', '🛠️'],
   ['disputes', 'Disputes', '⚖️'], ['analytics', 'Analytics', '📈'], ['integrations', 'Integrations', '🔌'], ['audit', 'Audit logs', '📜'],

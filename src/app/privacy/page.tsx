@@ -13,7 +13,7 @@ export default function Privacy() {
     <>
       <main id="main" className="narrow" style={{ padding: '2.4rem 0 4rem' }}>
         <h1>Privacy Policy</h1>
-        <p className="small muted">Last updated: 10 September 2026</p>
+        <p className="small muted">Last updated: 13 September 2026</p>
 
         <p>
           This page explains what Digital Saathi collects, why, and what you can do about it. We designed the
@@ -21,10 +21,31 @@ export default function Privacy() {
           human agent happens without your say-so first — the same rule applies to how we handle your data.
         </p>
 
-        <h2>1. What we collect</h2>
+        <h2 id="enquiries">1. Free-audit requests and business enquiries</h2>
+        <p>This section is the notice for the free Digital Audit form and any enquiry you send us about our business services.</p>
         <ul>
-          <li><strong>Account details</strong> — your name and email address, from Google sign-in or the email link
-            you request. We never receive or store a password.</li>
+          <li><strong>What we collect:</strong> your name; WhatsApp or mobile number; email address, if you give one; business,
+            institute or channel name; city; your role and field; what you need, what isn&rsquo;t working and the result you
+            want; which online profiles you already have; your timeline, budget range, preferred language and contact method;
+            and the link or site you came from. The form does not record your IP address.</li>
+          <li><strong>Why:</strong> to prepare your audit, contact you about your request in the way you chose, and send a
+            proposal if you ask for one. We do not sell this information, use it for advertising, or add you to bulk
+            messages.</li>
+          <li><strong>Who handles it:</strong> Digital Saathi&rsquo;s owner accounts, and Supabase, which stores it for us. If you
+            write to us on WhatsApp or by email, those services also process what you send.</li>
+          <li><strong>How long we keep it:</strong> up to 12 months after our last conversation if you don&rsquo;t become a client.
+            Client records are kept for the engagement and as long afterwards as the law requires (for example, invoices).
+            When you hire us, we work in your accounts only with the access you grant and only for the work in scope.</li>
+          <li><strong>Your choices:</strong> withdraw your consent, or ask for a copy, a correction or deletion, at any time by
+            emailing <a href="mailto:onlinedesk120@gmail.com">onlinedesk120@gmail.com</a>. We act on requests within 30 days. You
+            can also complain to the Data Protection Board of India under the Digital Personal Data Protection Act, 2023.</li>
+        </ul>
+
+        <h2>2. What we collect</h2>
+        <ul>
+          <li><strong>Account details</strong> — your name and email address, from Google sign-in, email and password, or the email
+            link you request. If you choose a password, our authentication provider (Supabase) stores it only in hashed
+            form; we never see it.</li>
           <li><strong>Profile details you add</strong> — phone number, city, preferred language, Easy Mode setting,
             and anything you choose to save to &ldquo;What Saathi remembers&rdquo; (for example your usual mobile
             operator or home address) so you do not have to repeat yourself. We explicitly ask you not to store
@@ -47,7 +68,7 @@ export default function Privacy() {
             so the same account works across devices.</li>
         </ul>
 
-        <h2>2. What we use it for</h2>
+        <h2>3. What we use it for</h2>
         <ul>
           <li>To carry out the tasks you ask for and show you their status and history.</li>
           <li>To personalise responses using what you have chosen to save (for example, defaulting to your usual
@@ -64,7 +85,7 @@ export default function Privacy() {
           We do not sell your personal data, and we do not use it to serve third-party advertising.
         </p>
 
-        <h2>3. Who we share it with</h2>
+        <h2>4. Who we share it with</h2>
         <ul>
           <li><strong>Service partners and digital agents</strong> — only the details needed to do the specific job
             you approved (for example, your address and the task description for a home visit), never your full
@@ -78,7 +99,7 @@ export default function Privacy() {
           <li><strong>Law enforcement or regulators</strong>, only where we are legally required to.</li>
         </ul>
 
-        <h2>4. Authorised access by our team</h2>
+        <h2>5. Authorised access by our team</h2>
         <p>
           A small number of authorised Digital Saathi team members can, for support and product-improvement
           purposes only, view account data in a read-only view that mirrors what you see — for example, to diagnose
@@ -87,7 +108,7 @@ export default function Privacy() {
           without your separate instruction.
         </p>
 
-        <h2>5. How long we keep it</h2>
+        <h2>6. How long we keep it</h2>
         <p>
           We keep your account data for as long as your account is active, plus a limited period afterward for
           legal, accounting and fraud-prevention purposes (typically up to 12 months for task and payment records,
@@ -95,7 +116,7 @@ export default function Privacy() {
           to delete your account, we delete your profile, task history and backup within 30 days, except records we
           are legally required to retain.</p>
 
-        <h2>6. Your choices</h2>
+        <h2>7. Your choices</h2>
         <ul>
           <li>Delete any single memory item, or turn memory off entirely, from Profile.</li>
           <li>Delete any document from your vault at any time.</li>
@@ -105,32 +126,32 @@ export default function Privacy() {
             it, using the city on your profile instead.</li>
         </ul>
 
-        <h2>7. Cookies and local storage</h2>
+        <h2>8. Cookies and local storage</h2>
         <p>
           We use browser storage to keep you signed in and remember your preferences (language, Easy Mode). We do
           not use third-party advertising cookies. If we add analytics cookies in the future, we will update this
           page first.
         </p>
 
-        <h2>8. Security</h2>
+        <h2>9. Security</h2>
         <p>
           Data in transit is encrypted (HTTPS). Our database uses row-level security so a signed-in user can only
-          read their own data by default, with the narrow, logged exception in section 4. We never store passwords —
-          sign-in is passwordless by design, which removes an entire class of risk.
+          read their own data by default, with the narrow, logged exception in section 4. Passwords, if you choose one, are stored only in hashed form by our
+          authentication provider; we never see them.
         </p>
 
-        <h2>9. Children and family accounts</h2>
+        <h2>10. Children and family accounts</h2>
         <p>
           Digital Saathi accounts are for people 18 and older. An elderly parent or a minor family member can be
           added as a linked profile under an adult&rsquo;s account (see Family), with permissions the adult
           controls — we do not knowingly collect data directly from a child in an independent account.
         </p>
 
-        <h2>10. Changes to this policy</h2>
+        <h2>11. Changes to this policy</h2>
         <p>We will update the date at the top when this page changes, and tell you in the app for material
           changes.</p>
 
-        <h2>11. Contact</h2>
+        <h2>12. Contact</h2>
         <p>
           Questions about this policy, or a request to access, correct or delete your data:{' '}
           <a href="mailto:onlinedesk120@gmail.com">onlinedesk120@gmail.com</a>. See also our{' '}

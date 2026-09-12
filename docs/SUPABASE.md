@@ -210,3 +210,18 @@ Real customer sessions load these two tables once at sign-in (`AppBoot.tsx`) and
 use them exactly where the local demo seed used to — Services, local-task
 matching, provider cards. A new approval shows up for a customer on their next
 sign-in or app reload; there is no live push yet.
+
+## 8. Free-audit leads from the public site
+
+`Admin → Integrations → Run database setup` also creates `saathi_leads`: every request from the
+free Digital Audit form (`/audit`), sent through `/api/leads`.
+
+- **Who can write:** anyone, through the public anon key — but only as a fresh lead
+  (`status = 'new'`, empty notes). Column checks cap every field's length; consent must be true.
+- **Who can read or update:** owner accounts only (`NEXT_PUBLIC_OWNER_EMAILS`), in **Admin → Leads**.
+- **No IP address is stored.** `/api/leads` rate-limits in memory and drops bot submissions
+  (hidden field, or a form finished in under 2.5 seconds).
+- **If the table does not exist yet**, the form still works: the visitor gets one-tap WhatsApp
+  (when `NEXT_PUBLIC_WHATSAPP_NUMBER` is set) or email with everything they typed.
+- Retention promised on the form and in the Privacy Policy: up to 12 months after the last
+  conversation unless the lead becomes a client; delete sooner on request.

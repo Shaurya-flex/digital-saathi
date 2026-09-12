@@ -41,11 +41,11 @@ export function Header() {
   const [open, setOpen] = useState(false);
   useEffect(() => { setOpen(false); }, [path]);
 
-  const pub = !user || path === '/' || path.startsWith('/learn') || path.startsWith('/partner')
-    || path.startsWith('/become-agent') || path.startsWith('/network') || path.startsWith('/terms') || path.startsWith('/privacy');
+  const pub = !user || path === '/' || ['/services', '/pricing', '/audit', '/learn', '/partner', '/become-agent', '/network', '/terms', '/privacy']
+    .some((p) => path.startsWith(p));
   const on = (p: string) => (path === p || (p !== '/' && path.startsWith(p)) ? 'on' : '');
-  const onNetwork = path.startsWith('/network') || path.startsWith('/partner') || path.startsWith('/become-agent');
   const real = ready ? getDB().mode === 'real' : false;
+  const { t } = useSiteLang();
 
   return (
     <header className={'top' + (open ? ' open' : '')}>
@@ -61,17 +61,16 @@ export function Header() {
         <div className="menu" id="sitemenu">
           {pub ? (
             <nav className="mainnav" aria-label="Main">
-              <Link href="/" className={path === '/' ? 'on' : ''}>Home</Link>
+              <Link href="/services" className={on('/services')}>Services</Link>
               <Link href="/pricing" className={on('/pricing')}>Pricing</Link>
-              <Link href="/learn" className={on('/learn')}>Learn</Link>
-              <Link href="/network" className={onNetwork ? 'on' : ''}>Partner with us</Link>
+              <Link href="/learn" className={on('/learn')}>{t('Learn', 'Seekhiye')}</Link>
             </nav>
           ) : null}
           <div className="actions">
             <LangSwitch className="desktoponly" />
             {ready && user ? (
               <>
-                {user.role === 'admin' ? <Link className="btn ghost sm" href="/admin/overview">Admin desk</Link>
+                {user.role === 'admin' ? <Link className="btn ghost sm" href="/admin/leads">Admin desk</Link>
                   : user.role === 'provider' ? <Link className="btn ghost sm" href="/provider/dash">Partner desk</Link>
                   : user.role === 'agent' ? <Link className="btn ghost sm" href="/agent/dash">Agent desk</Link>
                   : null}
@@ -88,7 +87,7 @@ export function Header() {
             ) : (
               <>
                 <Link className="btn ghost sm" href="/login">Log in</Link>
-                <Link className="btn sm" href="/login?mode=signup">Create account</Link>
+                <Link className="btn warm sm" href="/audit">{t('Free audit', 'Free audit')}</Link>
               </>
             )}
           </div>

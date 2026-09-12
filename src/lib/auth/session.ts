@@ -31,5 +31,5 @@ export function homeFor(role: Role): string {
   return role === 'customer' ? '/app/ask'
     : role === 'agent' ? '/agent/dash'
     : role === 'provider' ? '/provider/dash'
-    : '/admin/overview';
+    : '/admin/leads';
 }
